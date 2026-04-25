@@ -1,0 +1,68 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.so
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+.next/
+.nuxt/
+dist/
+*.lock
+!package-lock.json
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+*.ipr
+*.iws
+.gradle/
+local.properties
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+build/
+*.apk
+*.aab
+*.ipa
+
+# Data / Indexes
+data/faiss_index/
+*.faiss
+*.pkl
+
+# Logs
+logs/
+*.log
+
+# Misc
+*.tmp
+*.bak
+coverage/
+htmlcov/

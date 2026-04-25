@@ -1,0 +1,543 @@
+VendorLock AI Trade Intelligence Platform for FMCG & HORECA Distribution
+One-Line Pitch
+VendorLock is a chat-first AI trade intelligence platform that turns every order, payment, scheme, visit and dispute in India’s FMCG and HORECA supply chains into structured intelligence — builds a CIBIL-style trust score for every trade relationship, detects scheme leakage, fake returns, coverage gaps and expiry risk in real time, and tells distributors exactly who to trust, what to pre-stock and where they are losing money before the losses happen. For MVP, VendorLock runs on Telegram; the architecture is channel-agnostic so WhatsApp Business API can be plugged in next with no core changes
+Meet Ravi — The Story Behind The Product
+Ravi runs a mid-sized FMCG distribution business in Patna. He supplies 400 kiranas across 6 routes with 5 salesmen. Annual turnover: about ₹4 crore. He has been in business for 11 years.
+Ravi’s Monday morning
+ 7 AM: 60 chat messages flood in on Telegram and WhatsApp in Hindi, Bhojpuri, broken English. His accountant manually logs them into Excel at noon.
+ 8 AM: Salesman Rahul leaves for his beat — 25 outlets on paper. He will mark all 25 as “visited” by evening. 6 were skipped. Ravi never knows.
+ 10 AM: Retailer Mahesh places a ₹12,000 order on credit. Mahesh already owes ₹48,000 from 45 days ago. Ravi approves on instinct.
+ 12 PM: A Surf Excel scheme: buy 100 units, get 12% discount. Ravi gets 12%. He passes 7% to retailers. 5% is silently absorbed in the chain. Nobody tracks where it went.
+ 3 PM: A biscuit batch expires in 88 days — within the 90-day return window. Ravi doesn’t know. The window closes in 2 days. ₹18,400 will become a write-off.
+ 6 PM: Three retailers cut orders this week. Ravi assumes “slow season”. In reality, quick commerce launched in nearby pin codes last month, undercutting his kirana customers on key SKUs.
+By end of Monday, Ravi has lost
+ Missed revenue from Rahul’s skipped outlets.
+ Near-expiry stock heading toward write-off.
+ Fresh credit extended to an already risky buyer.
+ Scheme benefit never fully passed to retailers, weakening long-term trust.
+ Several hours of his accountant’s time on manual entry.
+VendorLock fixes each of these without Ravi changing how he prefers to work — messaging from his phone, using the same chats he uses today.
+WHY — The Problem
+India’s FMCG market is roughly ₹8.5–9 lakh crore annually, with around two-thirds of this flowing through general trade — kiranas, wholesalers and distributors — not supermarkets or modern retail. HORECA (hotels, restaurants, cafés, cloud kitchens) adds another huge, largely analog layer on top.
+In this world, every order, payment, scheme, return and complaint travels through chat messages, voice notes, handwritten diaries and Excel files. Nothing is structured, searchable or shared in real time. Credit decisions run on memory and gut feeling. Scheme economics are opaque. Quick commerce is eating margins before distributors realise what changed.
+Core pain points
+Problem
+What Happens Today
+Business Impact
+Unstructured ordering
+Retailers send chat messages in Hindi/Hinglish/voice; manually typed into Excel
+Items missed, wrong quantities, no reliable record
+Manual credit tracking
+Outstanding amounts tracked in Excel, diaries or memory
+3–8% of revenue lost to bad debt every year (typical informal trade range)
+Scheme leakage
+Brand schemes partially absorbed by intermediaries
+Retailers never see full benefit; brands spend blindly
+No trade memory
+Each relationship starts from zero
+Good payers unrewarded; bad payers get fresh credit under new names
+Salesman coverage gaps
+Routes decided informally; 20–30% outlets skipped or ghost-visited
+10–20% topline lost from missed coverage alone
+Returns & damage fraud
+Paper slips and photos; approvals ad-hoc
+Fake returns pass through; genuine returns miss brand deadlines
+Expiry risk
+Batch and expiry not tracked centrally
+Near-expiry stock becomes dead inventory
+HORECA
+Kitchens buy daily at fluctuating prices
+Price disputes; no vendor reliability
+complexity
+record
+Quick commerce pressure
+Blinkit/Zepto undercut kirana margins locally
+Distributors see “demand decline” but can’t pinpoint why
+GST compliance risk
+GSTIN status not tracked for vendors
+Input tax credit at risk on non-compliant suppliers
+One sentence: India’s FMCG and HORECA supply chains run on memory, chat and gut feeling — and every one of these failure modes has a direct rupee cost.
+Why Now
+Four forces converge in 2025–26 that make this the right moment:
+ Chat APIs (Telegram Bot API today; WhatsApp Business API next) are now accessible to any developer — distributors already live in these channels.
+ ONDC and allied initiatives are nudging millions of small sellers and retailers toward structured digital trade — VendorLock plugs in as the intelligence layer on top, not a competing marketplace.
+ Quick commerce is compressing kirana margins in Tier-1 and Tier-2 cities; distributors need forward-looking risk and margin intelligence now, not three years later.
+ Large language models now handle Indian languages and code-switching (Hindi, Hinglish, regional) well enough to safely parse real trade conversations.
+The distributor who builds a trust-scored, AI-intelligent network first will be far harder to displace than one that just installs yet another ledger app.
+Who It Is For
+Primary go-to-market target: FMCG distributors and super-stockist groups. Everyone else benefits as second-order users.
+Stakeholder
+Role
+Pain Today
+What They Need
+FMCG Distributor / Wholesaler
+Buys from brands; sells to retailers/HORECA
+Bad debt, scheme leakage, coverage gaps, expiry losses
+A control tower showing risk and protecting margins
+Field Salesman / Route Executive
+Visits outlets; collects orders and payments
+Poorly planned beat; gets blamed for missed outlets
+Daily chat-delivered beat plan with outlet intelligence
+Retailer / Kirana
+Places orders, pays,
+No scheme visibility;
+Easier ordering,
+Owner
+receives schemes
+manual reconciliation
+transparent schemes, fair credit terms
+HORECA Buyer
+Orders fresh and dry goods daily
+Price disputes; quality inconsistency; no vendor record
+Vendor reliability scores, price overcharge alerts
+FMCG Brand / Principal
+Designs schemes; wants channel sell-through
+No visibility into scheme pass-through
+Channel data without forcing full ERP on distributors
+NBFC / Lender
+Underwrites working capital loans
+No verified trade history for informal businesses
+Structured, scored trade history they can trust
+VendorLock will sell to distributors first; everyone else joins because it makes their own decisions safer and more profitable.
+What VendorLock Does
+VendorLock is not a full ERP or payroll system. It is a chat-native intelligence layer that sits on top of existing ordering channels and ledgers. We group capabilities into:
+ Core Distributor Intelligence (MVP + v2)
+ Adjacent Verticals and Threat Intelligence (v2+) 1. Captures All Trade on Chat — In Any Indian Language (MVP)
+Retailers continue messaging as they do today — in Hindi, Bhojpuri, Tamil, Bengali, Marathi, English or Hinglish. VendorLock’s Agent 1 reads each Telegram/WhatsApp message, extracts the order/payment/return/dispute intent, logs it to a structured ledger, and sends a confirmation back to the retailer in seconds. No forms, no app install.
+Example chat: “bhai 50 Surf 1kg aur 30 Maggi bhej do, udhaar pe” VendorLock parses and logs: { Kiran Stores | Surf 1kg × 50 | Maggi × 30 | payment_type: credit | timestamp: 7:14 AM }
+Auto-reply: “Order confirmed. Credit balance: ₹32,000 of ₹40,000 limit.”
+MVP note:
+ Channel: Telegram Bot for both distributor and retailers.
+ The same logic later connects to WhatsApp Business API with identical message schema.
+2. Builds a CIBIL-Style Trust Score for Every Trade Relationship (MVP)
+Every payment, order, return and dispute feeds into a Trust Score from 0–100 for each retailer, HORECA buyer and distributor. Good payers earn better credit terms and priority service; risky buyers are flagged before outstanding amounts become losses.
+Trust Score factors (example weights):
+ Payment discipline (on-time vs delayed vs defaulted) – 30%
+ Order consistency (regular, predictable behaviour) – 20%
+ Cancellation rate (last-minute changes, no-shows) – 15%
+ Return frequency (vs peer average) – 15%
+ Communication reliability (response time, confirmation behaviour) – 10%
+ Trade stability (length and continuity of relationship) – 10%
+Score tiers:
+ 80–100: Tier A — trusted; highest limits and most flexible terms.
+ 60–79: Tier B — reliable; standard limits and normal terms.
+ 40–59: Tier C — caution; reduced limits and close monitoring.
+ 0–39: Tier D — risk; cash-only or credit freeze.
+Retailers can query “MYSCORE” via chat anytime to see their own score and tier. 3. Detects Scheme Leakage in Real Time (v2 core)
+VendorLock knows what scheme benefit came in from each brand and what went out to each retailer. It tracks pass-through and flags gaps per order, per customer, per month.
+Example:
+ Brand scheme: “Buy 100 units Surf Excel → 12% discount.”
+ Distributor benefit: 12%.
+ Benefit actually passed on to Kiran Stores: 7%.
+VendorLock alert: “Scheme leakage: 5% (₹2,000) on this order. Month-to-date leakage: ₹47,000 across 14 retailers.”
+4. Monitors Beat Coverage — Catches Ghost Visits (v2 core)
+Every outlet should be visited or at least contacted on a known cadence. VendorLock combines the outlet master list, chat interactions and optional GPS pings to detect:
+ Outlets not visited for N days.
+ Salesmen who mark visits without any orders or 2-way chat.
+ Sectors that are under-served for weeks.
+Each morning, each salesman gets a chat message with:
+ Ordered outlet list.
+ Priority SKUs to push (near-expiry, high-margin, scheme-active).
+ Risky or high-value retailers to focus on.
+Example alert: “Sector 4 red for 3 weeks. Rahul has 6 check-ins with zero messages and zero orders. Likely ghost visits worth ~₹14,000 missed revenue this week.” 5. Catches Fake Returns and Protects Margin (v2 core)
+Every return request is cross-checked against the original invoice and ledger:
+ Quantity, batch number, purchase date, reason, supporting photo/voice note.
+ Batch-level expiry data.
+ Historical return pattern of that retailer.
+VendorLock classifies returns as GENUINE / WITHIN_WINDOW / EXPIRED_WINDOW / SUSPICIOUS.
+Example: Kiran Stores: “Return 40 units Maggi — near expiry.” VendorLock: purchased 4 months ago, expiry in 8 months, retailer has high recent return rate.
+Alert: “₹1,800 credit note on hold. Claimed near-expiry does not match batch data. Review before approving.” 6. Tracks Near-Expiry Stock Before It Becomes Dead Inventory (v2 core)
+Batch-wise expiry dates are captured from invoice photos on day one. VendorLock gives:
+ 90-day alerts: within brand return window, initiate claim.
+ 30-day alerts: push to top of beat plan and discount if needed.
+ “What-if” projection: shows likely rupee loss if no action is taken.
+Example alert: “Batch HUL2024B — 200 units biscuits. Brand return window closes in 2 days. Estimated value: ₹18,400. File claim today.” 7. HORECA Intelligence — Price, Reliability and Daily Spend (v2 adjacency)
+For kitchens that order via chat, VendorLock:
+ Parses daily orders across fresh produce, proteins and dry goods.
+ Tracks vendor-wise price history and quality complaints.
+ Builds vendor reliability scores and category-wise spend dashboards.
+ Learns menu-linked demand patterns (e.g., paneer spikes Thu–Sun).
+Example alert: “Chicken today billed at ₹195/kg vs 4-invoice average ₹180. Overcharge: ~₹750 on 50 kg. Vendor reliability score adjusted; consider re-negotiation.” 8. Quick Commerce Threat Monitor (v2 adjacency)
+VendorLock’s Quick Commerce module (cron on Lambda or similar) tracks public prices on Blinkit/Zepto/Instamart for top SKUs in each distributor’s pin codes.
+ Flags pin codes where QC undercuts retailer margin beyond a set threshold.
+ Recommends redirecting push to safer regions or adjusting scheme support.
+Example: “Maggi: QC price ₹12 in pin codes 800001–800009. Your average retailer margin falls below threshold. Shift Maggi push to Danapur and Phulwari where QC is not active.”
+The “Lock” — Why VendorLock Is Hard To Leave
+In general trade, retailers switch vendors quickly — for ₹1 lower price, slightly faster delivery, or a personal relationship. Loyalty is thin because there is almost nothing to lose by switching.
+VendorLock changes that equation. Once a retailer has used VendorLock for 6–18 months, they have built up something genuinely valuable: a verified trade reputation that is recognised by distributors and lenders.
+If they switch:
+ Their full behavioural history remains inside the old network.
+ They can carry a summary Trust Certificate to a new distributor, but the new distributor will still be more cautious until fresh on-platform behaviour is observed.
+ They lose priority perks: higher credit limits, scheme access, 24-hour delivery, pre-orders on scarce SKUs.
+Example — the ₹1 cheaper offer that isn’t worth it:
+ Kiran Stores: Trust Score 88 (Tier A), credit limit ₹40,000, top scheme access, priority delivery.
+ New distributor offers Surf Excel ₹1/unit cheaper but is not yet on VendorLock.
+Switching outcome:
+ Kiran can show a Trust Certificate, but the new distributor still caps first-month credit at, say, ₹5,000–10,000 until their own VendorLock-logged history is built.
+ Priority delivery and scheme tier reset.
+ Any NBFC loan evaluation that relied on the previous distributor’s long history may need re-verification.
+For many retailers, ₹1 cheaper on a few cartons is not worth losing that earned reputation.
+What a Retailer Loses By Leaving the Network
+Asset Built Over Time
+What Happens If They Move To A New Distributor Outside Their Network
+High Trust Score with long, clean payment history
+New distributor sees only summary; will extend credit cautiously
+Tier A priority service
+Back to standard service until local track record is re-established
+Earned credit limit (e.g., ₹40,000)
+Initial limit much lower for safety
+Access to top schemes and retries on key SKUs
+Eligibility only after new relationship proves itself
+Verified history supporting an NBFC loan
+Lender may ask for updated data or fresh references
+What a Distributor Loses By Leaving VendorLock
+ 12–18 months of trade history, trust scores and scheme records.
+ Outlet-level intelligence: beat plans, coverage gaps, risk maps.
+ Decision models calibrated to their territory (score thresholds, seasonal baselines).
+ Audit-ready scheme pass-through records.
+There is no lock-in by contract — no long-term obligation or exit fee. The lock is behavioural and data-driven: walking away is like voluntarily deleting a well-earned CIBIL score.
+Network Effect
+VendorLock’s network becomes more valuable with each participant:
+ Distributors prefer VendorLock-scored retailers — less guesswork and lower bad debt.
+ Retailers prefer VendorLock distributors — better terms for those who behave well.
+ Brands prefer VendorLock distributors — scheme pass-through is visible and auditable.
+ NBFCs prefer VendorLock borrowers — structured behavioural history lowers underwriting risk.
+This flywheel compounds as more trade gets captured and scored.
+Fairness By Design — Switching & Protection
+VendorLock deliberately creates switching costs without creating traps. The score belongs to the relationship, and a summary of that reputation belongs to the parties, not to VendorLock alone.
+Scenario 1 — Mutual Agreement Switch
+ Retailer asks current distributor for a Trust Certificate export.
+ Platform generates a tamper-proof PDF: Trust Score, tier, months of history, payment discipline %, return rate vs peer average, consistency index, plus a QR code linking to a read-only verification page.
+ New distributor (also on VendorLock) imports the certificate to set an initial tier above a typical new customer, then lets full on-platform behaviour rebuild the live score.
+ Score continues building from that starting point.
+Scenario 2 — Retailer Wants To Switch, Distributor Refuses
+ Retailer can also request a basic Trust Certificate directly from VendorLock, verified via OTP on their phone.
+ That certificate contains behavioural aggregates, not raw transaction logs, and can be shared with another distributor or NBFC.
+ The new distributor sees enough signal to offer better terms than “stranger” status, but still needs time to fully trust the relationship.
+Scenario 3 — Distributor Exploiting a Locked Retailer
+To prevent abuse (e.g., distributor raising prices or quietly absorbing schemes knowing the retailer is “locked”), VendorLock supports a two-way Trust Score:
+ Retailers can rate distributors on delivery punctuality, price consistency, scheme accuracy and complaint responsiveness.
+ Distributor scores are visible to brands, NBFCs and prospective retailers considering joining that network.
+ Chronic low scores or disputes raise questions for brands and finance partners, not just for the retailer.
+Retailers can always see their own score and initiate a certificate export. They are invested in the system, not trapped by it.
+Safeguards & System Integrity
+Design principle: no participant should have unchecked power over another participant’s reputation, credit or livelihood.
+Distributor-Side Safeguards
+ Risk: Distributor manipulates a retailer’s Trust Score downward.
+o Safeguard: Every score change must be backed by evidential anchors (chat logs, invoices, delivery records). Manual adjustments are impossible. Retailers get automatic notifications with a “DISPUTE” option; disputed changes are frozen until resolved.
+ Risk: Fake retailer accounts created to absorb scheme benefits.
+o Safeguard: New retailers require GSTN, Aadhaar-linked mobile or other strong ID. Schemes only activate after a minimum number of real orders. Outlets with one-way traffic (only scheme redemption, no normal orders) are flagged.
+ Risk: False scheme documents uploaded.
+o Safeguard: Scheme definitions are ingested from official brand PDFs or APIs where possible. All custom overrides require review. Unverified schemes stay inactive.
+Retailer-Side Safeguards
+ Risk: Score gaming — behave well for months, then default big.
+o Safeguard: Credit velocity monitoring; sudden utilisation spikes or order-size anomalies trigger manual review regardless of score.
+ Risk: Multiple accounts to reset a bad score.
+o Safeguard: Identity anchoring via GSTN, Aadhaar-linked mobile and address. Cross-network defaulter flags propagate in anonymised form.
+ Risk: Fake complaints against a distributor.
+o Safeguard: Complaint weight is proportional to the complainant’s own Trust Score. A minimum number of independent complaints plus objective evidence is required before a distributor’s score is impacted.
+Salesman-Side Safeguards
+ Risk: Salesman pockets cash collections.
+o Safeguard: Dual-confirmation payments; whenever a salesman logs a collection, the retailer receives a message: “₹X received from you. Reply YES or DISPUTE.” Unconfirmed collections are flagged.
+ Risk: Salesman–retailer collusion on fake returns.
+o Safeguard: No salesman can approve returns above a threshold; all such requests route to a distributor dashboard. Per-salesman return approval rates are tracked for anomalies.
+AI & System Safeguards
+ Risk: Model misreads a chat message.
+o Safeguard: Confirm-before-commit; every parsed order is sent back to the retailer for confirmation before logging. Low-confidence parses are held for manual review.
+ Risk: Wrong expiry date parsed from invoice.
+o Safeguard: Expiry data is always surfaced in human-readable form for first-time confirmation; suspicious dates (already past) are not silently accepted.
+Market & Platform Safeguards
+ Risk: VendorLock becomes a data monopoly.
+o Safeguard: Individual trade data is never sold. Only anonymised, aggregated insights are offered as a data service. Every user owns their data and can export/delete within policy.
+ Risk: Dominant distributor blocks new entrants by refusing certificates.
+o Safeguard: Retailer-initiated certificate export exists; distributor approval is helpful but not strictly required.
+ Risk: New retailer has no history and is locked out of credit.
+o Safeguard: Neutral starting score (e.g., 50/100) with a small “Trust Building” credit band universally available; existing high-score retailers can vouch, taking a small reputational stake.
+ Risk: Large buyer bullies small supplier via unfair ratings.
+o Safeguard: Right to respond for every negative rating; size-adjusted scoring so small suppliers are not evaluated by big-corporate benchmarks.
+A short internal summary table can map each risk to its corresponding safeguard.
+What Makes VendorLock Different
+VendorLock’s wedge is clear: it is not a ledger, it is an intelligence layer. Ledgers record what happened; VendorLock tells you what is likely to go wrong and what to do about it.
+Competitive feature snapshot
+Feature / Aspect
+Khatabook
+OkCredit
+Bizom
+VendorLock
+Digital ledger / records
+Yes
+Yes
+Yes
+Yes
+Chat-native ordering
+Partial
+No
+No
+Yes (Telegram → WhatsApp)
+Multilingual AI (Indian langs)
+No
+No
+No
+Yes
+CIBIL-style Trust Score
+No
+No
+No
+Yes
+Scheme leakage detection
+No
+No
+Partial
+Yes
+Beat intelligence + ghost visits
+No
+No
+Yes
+Yes (with Trust + scheme context)
+HORECA vertical
+No
+No
+No
+Yes (v2)
+Quick commerce threat monitor
+No
+No
+No
+Yes (v2)
+NBFC/financial inclusion bridge
+No
+No
+Limited
+Yes (v2)
+Fairness safeguards / portable score
+No
+No
+No
+Yes
+Behavioural lock-in (earned)
+No
+No
+Process-based
+Yes
+Existing tools are primarily digital passbooks. VendorLock behaves more like a credit bureau plus risk console for the distribution network.
+Market Opportunity
+Approximate opportunity framing for internal planning:
+Market Fact
+Indicative Number
+India FMCG market (FY25)
+~₹8.5–9 lakh crore
+Share via general trade
+~65% → ~₹5.5–6 lakh crore
+Kirana stores
+~6.5 million
+Distributors / wholesalers
+Several lakh across India
+Informal retail and trade units
+10–13 million+
+India HORECA market
+Tens of billions of dollars equivalent
+Existing AI-native trade intelligence tools
+No widely adopted incumbents
+Business Model
+Plans
+Plan
+Target
+Price (Monthly)
+Includes
+Starter
+Single distributor, one territory
+₹2,000–5,000
+Order capture, Trust Score, basic credit alerts, dashboard
+Growth
+Larger distributor, multi-territory
+₹8,000–20,000
+Beat intelligence, scheme leakage, returns engine, expiry module, HORECA mode
+Enterprise
+Brand-aligned super-stockist groups
+Custom annual
+Brand APIs, secondary sales feed, audit trail, ONDC connectors
+Additional Revenue Streams
+ Data services for FMCG brands — anonymised sell-through and scheme performance by region, never individual transactions.
+ Referral commissions from NBFCs for loans underwritten using VendorLock Trust Scores, subject to regulatory compliance.
+Technical Architecture & Implementation
+VendorLock is a multi-tenant, cloud-native SaaS platform with three layers:
+1. Channel Layer (Telegram now, WhatsApp + web next).
+2. AI Agent Layer (6 core agents + additional modules).
+3. Data Layer (structured ledger, documents, vector store, audit trail).
+Channel Layer
+ Telegram Bot API (MVP) for distributors and retailers.
+ WhatsApp Business API (roadmap) with the same message schema.
+ Web dashboard for distributors (control tower) and optional NBFC/brand read-only views.
+Frontend (React + TypeScript + Tailwind CSS)
+Key surfaces:
+ Distributor dashboard: trust map, risk alerts, revenue and leakage heatmaps.
+ Scheme Leakage Monitor panel.
+ Beat Intelligence and Coverage Heatmap.
+ Credit Decision Panel.
+ Expiry & Returns Calendar.
+ HORECA Mode panel.
+ Quick Commerce Threat Map.
+ Retailer self-service score card (MYSCORE).
+ Audit Trail Viewer (hash-chain log).
+Backend (FastAPI in Python)
+ Webhook handlers for Telegram and, later, WhatsApp.
+ 6-Agent Orchestrator to coordinate agent triggers.
+ REST APIs for /order, /trust-score, /risk-alert, /beat-plan, /certificate.
+ ONDC-compatible endpoint (mock in MVP, production later).
+6-Agent AI Pipeline
+ Agent 1 — Trade Capture & Normalisation.
+ Agent 2 — Trust & Behaviour Scoring.
+ Agent 3 — Risk, Scheme & Compliance Intelligence (core).
+ Agent 4 — Action & Recommendation.
+ Agent 5 — Demand & Pre-Stock Forecast.
+ Agent 6 — Beat Intelligence & Coverage.
+Additional modules sit on top of these (returns engine, expiry module, quick commerce monitor, secondary sales estimator, Trust Certificate generator, immutable trade ledger).
+Data Layer
+ PostgreSQL — structured ledger, trust scores, beat logs, schemes, audit events.
+ MongoDB — raw chat payloads, AI outputs, scheme PDFs.
+ Vector store (e.g., FAISS/Pinecone) — embeddings for scheme documents and policy text (used by Agent 3).
+ S3 — documents, invoice images, report exports, Trust Certificates.
+Infrastructure
+ AWS ECS (or similar) — containerised services per tenant/cluster.
+ AWS Lambda + CloudWatch — scheduled jobs (quick commerce price scrape, expiry sweep, GST checks).
+ Audit: SHA-256 hash chain in Postgres for MVP; AWS QLDB or equivalent ledger DB in production.
+Technology Stack Summary
+ Frontend: React + TypeScript + Tailwind.
+ Backend: FastAPI (Python).
+ AI: Claude-class LLMs on AWS Bedrock for multilingual parsing and reasoning; LangChain for orchestration.
+ Orchestration: AWS Strands / LangChain for agent pipeline.
+ Databases: Postgres + MongoDB + vector store.
+ Storage: S3.
+ Jobs: Lambda.
+ Containers: ECS + Docker.
+Data Sources & Interoperability
+Source
+Format
+How VendorLock Uses It
+Chat messages
+Text, images, voice transcripts
+Agent 1 parses into structured trade ledger
+ERP exports
+CSV / JSON
+Backfill ledger on distributor onboarding
+Scheme documents
+PDFs / structured tables
+Agent 3 RAG extracts scheme rules
+GSTIN lookup
+Public GSTN API
+Agent 3 flags compliance risk per vendor
+Quick commerce prices
+Scrapes / mock API
+Quick Commerce Threat Monitor
+GPS / check-ins
+Lightweight pings / timestamps
+Agent 6 validates beats and ghost visits
+ONDC APIs
+REST endpoints (roadmap)
+Brand and seller integrations
+NBFC partner APIs
+REST
+Loan application using Trust Certificates
+The 6 Agents — Technical Overview
+This section is for your internal dev team; keep it concise and implementation-oriented.
+Agent 1 — Trade Capture & Normalisation (MVP)
+Purpose: Convert informal, multilingual chat messages into clean, structured trade records.
+Inputs: Telegram/WhatsApp messages (text, Hinglish, regional languages), voice note transcripts, invoice photos.
+Core logic: Intent classification (order / payment / return / dispute / scheme query) → entity extraction (items, quantities, unit prices, retailer ID, payment type, dates) → validation against product master → save to ledger.
+Confirm-before-commit: Every parsed order is sent back to retailer for YES/DISPUTE before final logging.
+Output: Structured event object with items, payment type, timestamp, channel, confidence score, status.
+HORECA mode: Parses daily kitchen procurement orders similarly, with vendor_id and agreed price.
+Agent 2 — Trust & Behaviour Scoring (MVP)
+Purpose: Maintain a multi-factor Trust Score for every counterparty.
+Inputs: Full ledger — payments, orders, returns, disputes, communication logs.
+Logic:
+ Compute weighted sub-scores for each behaviour dimension.
+ Build a composite Trust Score plus 30/90-day trend.
+ Compute a consistency index (sudden deviations penalised even before defaults).
+ Adjust for seasonality by comparing retailers to their own historical baselines, not absolute thresholds.
+Outputs: trust_score, tier, trend, flags (e.g., “2 late payments in last 30 days”), consistency_index.
+Agent 3 — Risk, Scheme & Compliance Intelligence (Core v2)
+Purpose: Combine Trust Scores, ledger data, scheme rules and compliance info to surface hidden risks and leakages.
+Inputs: Trust outputs from Agent 2, full trade ledger, scheme PDFs (via RAG), batch/expiry data, vendor GSTIN + external compliance feeds.
+Logic (five functions):
+1. Credit risk detection — score trend + outstanding + order pattern.
+2. Scheme leakage & pass-through tracking.
+3. Returns & damage validation.
+4. Expiry & near-expiry intelligence.
+5. GST compliance flag per vendor.
+Output: Structured alerts tagged INFO / WARNING / CRITICAL for Agent 4.
+Agent 4 — Action & Recommendation (v2 core)
+Purpose: Turn risk and intelligence signals into concrete, human-reviewable actions.
+Inputs: Alerts from Agent 3 + distributor credit policy and risk appetite.
+Outputs:
+ Dashboard action cards.
+ Chat-ready draft messages for collections, scheme explanations, credit decisions, vendor switches, brand return claims, Trust Certificates, etc.
+Human-in-the-loop: Nothing executes automatically; distributor/manager reviews and approves.
+Agent 5 — Demand & Pre-Stock Forecast (v2)
+Purpose: Predict future demand per SKU per zone and recommend pre-stocking.
+Inputs: Historical order series per SKU–retailer pair, seasonality calendar, active schemes, HORECA menu patterns.
+Outputs:
+ Demand spikes and drops by SKU/region.
+ Pre-stock alerts for distributors.
+ HORECA insights for kitchens.
+Integration: Feeds Agent 2’s seasonality baseline and Agent 6’s beat planning (high-demand SKUs inserted into routes automatically).
+Agent 6 — Beat Intelligence & Coverage (v2 core)
+Purpose: Ensure salesmen visit the right outlets and prevent missed coverage.
+Inputs: Outlet master list, check-in logs, order history per outlet.
+Logic:
+ Detect coverage gaps and ghost visits.
+ Run shortest-path routing weighted by outlet priority and risk.
+ Generate daily beat plans.
+Outputs:
+ Coverage gap alerts.
+ Ghost visit alerts.
+ Weekly missed revenue summaries.
+ Salesman Reliability Score (ghost visit rate, collection confirmation rate).
+Additional Modules — Technical Detail (v2+)
+ Returns & Damage Reconciliation Engine — extension of Agent 3 with richer workflows.
+ Quick Commerce Pressure Monitor — scheduled job and map visual.
+ Secondary Sales Estimator — uses re-order frequency and volumes to infer sell-through velocity by SKU/region.
+ Immutable Trade Ledger — SHA-256 hash chain over critical events, upgrading to ledger DB in production.
+ Trust Certificate Generator — PDF summary with QR verification link.
+Agent Orchestration Flow (Simplified)
+1. Chat message received on Telegram (later WhatsApp).
+2. FastAPI webhook passes to Agent 1.
+3. Agent 1 parses, confirms with retailer, then commits to Postgres ledger.
+4. Parallel triggers: Agent 2 updates Trust Score; Agent 3 evaluates risk and schemes.
+5. Agent 3 pushes alerts to an alerts queue.
+6. Agent 4 converts alerts into action cards and draft chat messages.
+7. Distributor reviews actions, approves or edits.
+8. Agents 5 and 6 update demand forecasts and beat plans in the background.
+Business Value, Uniqueness & MVP Scope
+Every agent output maps directly to either ₹ recovered or ₹ risk avoided:
+ Bad debt reduction.
+ Scheme leakage recovery.
+ Beat coverage uplift and missed-revenue recovery.
+ Expiry write-off reduction.
+ Better NBFC terms for scored customers.
+Uniqueness:
+ Chat-native, multilingual AI capture for informal trade.
+ CIBIL-style Trust Score tied to real behaviour, not self-reported data.
+ Combined scheme leakage, beat intelligence, HORECA mode, quick commerce threat, and fairness safeguards in one system.
+ Behavioural trade memory that compounds into a network moat.
+24-Hour MVP Scope (What We Actually Build For Hackathons)
+ Telegram message console → webhook → sample Hindi/English payloads.
+ Agent 1: order parsing (Hindi/English).
+ Agent 2: Trust Score with mock 6-month history.
+ Agent 3: credit risk + basic scheme leakage + simple suspicious return check.
+ Agent 4: credit recommendation + collection nudge draft.
+ Agent 6: simple beat coverage + ghost visit detection from mock logs.
+ Distributor React dashboard with Trust Score list, basic alerts and scheme panel.
+ SHA-256 hash-chain audit log for last N critical events.
+ Trust Certificate PDF export for one mock retailer.
+Features like HORECA mode, quick commerce monitor, GST checks, ONDC connectors and full NBFC pipeline sit explicitly outside the 24-hour MVP and move into v2/v3.
+Scalability
+ New distributor → provision new tenant, import ERP CSV, go live; no code change.
+ New region or language → same agents; only UI localisation and language configuration.
+ New brand scheme → upload brand PDF; Agent 3 RAG ingests automatically.
+ HORECA rollout → configuration switch per tenant.
+ Brand data API → read-only aggregated endpoint on existing data.
+ Millions of distributors → multi-tenant partitioning by tenant_id + autoscaling containers.
+Final Architecture Summary
+Channel: Telegram (MVP), WhatsApp Business API + web (roadmap). Frontend: React + TypeScript + Tailwind CSS. Backend: FastAPI. AI Pipeline: Bedrock-hosted LLMs + LangChain + AWS Strands for multi-agent orchestration. Core Agents: 6, plus 7 additional modules. Databases: PostgreSQL + MongoDB + vector store. Storage: S3. Jobs: Lambda + CloudWatch Events. Audit: SHA-256 hash chain (MVP) → ledger database (production). Infra: ECS + Docker. Interoperability: GSTN API, ONDC REST, NBFC partner APIs.
+VendorLock turns India’s chat-driven FMCG and HORECA trade from memory and guesswork into a scored, safeguarded network that gets harder to walk away from each month — not because of contracts, but because of earned reputation.
