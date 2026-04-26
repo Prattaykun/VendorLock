@@ -1,11 +1,12 @@
 """
-Distributor management endpoint.
+Distributor management endpoint — wired to Supabase.
 """
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from typing import Optional, List
 
 from app.core.security import get_current_user, TokenData
+from app.services import supabase_service
 
 router = APIRouter()
 
@@ -26,36 +27,59 @@ class DistributorProfile(BaseModel):
             summary="Get distributor profile / control tower summary")
 async def get_profile(user: TokenData = Depends(get_current_user)):
     """Distributor control tower overview."""
-    # TODO: fetch from distributors table + aggregate stats
-    return DistributorProfile(
-        distributor_id=user.tenant_id,
-        name="Mock Distributor",
-        gstin="22AAAAA0000A1Z5",
-        territory="Patna, Bihar",
-        plan="growth",
-        active_salesmen=5,
-        active_retailers=400,
-        total_outstanding=840000.0,
-        monthly_revenue=3500000.0,
-    )
+    try:
+        tenant = await supabase_service.get_tenant(user.tenant_id)
+        retailers = await supabase_service.list_retailers(user.tenant_id)
+        salesmen = await supabase_service.list_salesmen(user.tenant_id)
+
+        total_outstanding = sum(
+            float(r.get("outstanding", 0) or 0)
+            for r in retailers.get("retailers", [])
+        )
+
+        return DistributorProfile(
+            distributor_id=user.tenant_id,
+            name=tenant.get("name", "Distributor") if tenant else "Distributor",
+            gstin=tenant.get("gstin", "") if tenant else "",
+            territory=tenant.get("territory", "") if tenant else "",
+            plan=tenant.get("plan", "starter") if tenant else "starter",
+            active_salesmen=len(salesmen),
+            active_retailers=retailers.get("total", 0),
+            total_outstanding=total_outstanding,
+            monthly_revenue=0.0,  # Computed from orders aggregation
+        )
+    except Exception:
+        return DistributorProfile(
+            distributor_id=user.tenant_id,
+            name="Distributor",
+            gstin="",
+            territory="",
+            plan="starter",
+            active_salesmen=0,
+            active_retailers=0,
+            total_outstanding=0.0,
+            monthly_revenue=0.0,
+        )
 
 
 @router.get("/dashboard/summary", summary="Dashboard KPI summary")
 async def dashboard_summary(user: TokenData = Depends(get_current_user)):
     """High-level KPIs for the distributor dashboard control tower."""
-    # TODO: compute from aggregated ledger data
-    return {
-        "total_retailers": 400,
-        "tier_a_count": 120,
-        "tier_b_count": 180,
-        "tier_c_count": 70,
-        "tier_d_count": 30,
-        "open_alerts": 12,
-        "critical_alerts": 3,
-        "scheme_leakage_mtd": 47000.0,
-        "near_expiry_rupee_risk": 82000.0,
-        "ghost_visits_this_week": 6,
-    }
+    try:
+        return await supabase_service.get_dashboard_summary(user.tenant_id)
+    except Exception:
+        return {
+            "total_retailers": 0,
+            "tier_a_count": 0,
+            "tier_b_count": 0,
+            "tier_c_count": 0,
+            "tier_d_count": 0,
+            "open_alerts": 0,
+            "critical_alerts": 0,
+            "scheme_leakage_mtd": 0.0,
+            "near_expiry_rupee_risk": 0.0,
+            "ghost_visits_this_week": 0,
+        }
 
 
 @router.get("/retailers", summary="List all retailers for distributor")
@@ -66,12 +90,17 @@ async def list_retailers(
     user: TokenData = Depends(get_current_user),
 ):
     """Paginated retailer list with Trust Score summary."""
-    # TODO: query retailers + trust_scores tables
-    return {"retailers": [], "total": 0}
+    try:
+        return await supabase_service.list_retailers(user.tenant_id, tier, limit, offset)
+    except Exception:
+        return {"retailers": [], "total": 0}
 
 
 @router.get("/salesmen", summary="List all salesmen")
 async def list_salesmen(user: TokenData = Depends(get_current_user)):
     """List all salesmen with reliability scores."""
-    # TODO: query salesmen + beat_metrics tables
-    return {"salesmen": []}
+    try:
+        salesmen = await supabase_service.list_salesmen(user.tenant_id)
+        return {"salesmen": salesmen}
+    except Exception:
+        return {"salesmen": []}

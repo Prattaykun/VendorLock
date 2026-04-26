@@ -23,7 +23,8 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import type { Retailer, RetailerTier } from "@/types/dashboard";
-import { alerts, actionCards, orderFeed, retailers } from "@/lib/mock-data";
+import { alerts as mockAlerts, actionCards as mockActionCards, orderFeed as mockOrderFeed, retailers as mockRetailers } from "@/lib/mock-data";
+import { getDashboardSummary, getRetailers, listOrders, listAlerts, setAuthToken } from "@/lib/api-client";
 import {
   formatInr, formatTimeStable, formatDateStable,
   alertPillClass, orderStatusClass, tierClass, trendArrow, trendClass, scoreColor, scoreBarColor,
@@ -46,8 +47,6 @@ const panelItems: { key: PanelKey; label: string; icon: ReactNode }[] = [
   { key: "expiry-calendar", label: "Expiry & Returns", icon: <CalendarClock size={18} /> },
   { key: "audit-trail", label: "Audit Trail", icon: <ShieldCheck size={18} /> },
 ];
-
-const atRiskRetailers = [...retailers].sort((a, b) => a.trustScore - b.trustScore).slice(0, 3);
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -10 }, transition: { duration: 0.5 } };
 const stagger = { animate: { transition: { staggerChildren: 0.1 } } };
@@ -74,15 +73,56 @@ export default function DistributorControlTower() {
   const [mobileNav, setMobileNav] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
+  // Live Data State
+  const [alerts, setAlerts] = useState(mockAlerts);
+  const [actionCards, setActionCards] = useState(mockActionCards);
+  const [orderFeed, setOrderFeed] = useState(mockOrderFeed);
+  const [retailers, setRetailers] = useState(mockRetailers);
+  const [summary, setSummary] = useState<any>(null);
+
   useEffect(() => {
-    setIsDataLoading(true);
-    const timer = setTimeout(() => setIsDataLoading(false), 1200);
-    return () => clearTimeout(timer);
+    // For local dev, hardcode a token so it doesn't fail immediately
+    setAuthToken("dev-token");
+
+    const fetchData = async () => {
+      setIsDataLoading(true);
+      try {
+        const [sumRes, retRes, ordRes, alertRes] = await Promise.allSettled([
+          getDashboardSummary(),
+          getRetailers(),
+          listOrders({ limit: 10 }),
+          listAlerts()
+        ]);
+
+        if (sumRes.status === "fulfilled") setSummary(sumRes.value);
+        if (retRes.status === "fulfilled" && retRes.value.retailers?.length) {
+          // Map DB retailers to UI format
+          setRetailers(retRes.value.retailers.map((r: any) => ({
+            id: r.id, name: r.name || "Unknown Retailer", tier: (r.trust_scores?.[0]?.tier || "C") as RetailerTier,
+            trustScore: r.trust_scores?.[0]?.composite_score || 50, trend: "STABLE", outstanding: r.outstanding || 0,
+            creditLimit: r.credit_limit || 50000, lastPaymentDate: r.created_at || new Date().toISOString(),
+            factors: r.trust_scores?.[0]?.sub_scores || { paymentDiscipline: 50, orderConsistency: 50, cancellationRate: 50, returnFrequency: 50, communicationReliability: 50, tradeStability: 50 }
+          })));
+        }
+        if (ordRes.status === "fulfilled" && ordRes.value.orders?.length) {
+          setOrderFeed(ordRes.value.orders.map((o: any) => ({
+            id: o.id, retailerId: o.retailer_id, retailerName: "Retailer " + o.retailer_id.slice(0, 4),
+            status: o.status, orderValue: o.total_amount || 0, itemCount: o.items?.length || 1, createdAt: o.created_at
+          })));
+        }
+      } catch (err) {
+        console.warn("Backend unavailable, using mock data", err);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+    fetchData();
   }, [activePanel]);
 
+  const atRiskRetailers = [...retailers].sort((a, b) => a.trustScore - b.trustScore).slice(0, 3);
   const unresolvedCritical = alerts.filter((a) => a.type === "CRITICAL" && !a.resolved);
   const alertSummary = {
-    CRITICAL: alerts.filter((a) => a.type === "CRITICAL" && !a.resolved).length,
+    CRITICAL: summary?.critical_alerts ?? alerts.filter((a) => a.type === "CRITICAL" && !a.resolved).length,
     WARNING: alerts.filter((a) => a.type === "WARNING" && !a.resolved).length,
     INFO: alerts.filter((a) => a.type === "INFO" && !a.resolved).length,
   };
@@ -95,7 +135,7 @@ export default function DistributorControlTower() {
       if (sortBy === "trend") { const tv = { UP: 3, STABLE: 2, DOWN: 1 }; return (tv[a.trend] - tv[b.trend]) * dir; }
       return (a[sortBy] - b[sortBy]) * dir;
     });
-  }, [sortBy, sortDirection, tierFilter]);
+  }, [sortBy, sortDirection, tierFilter, retailers]);
 
   const onSort = (key: SortKey) => {
     if (sortBy === key) { setSortDirection((p) => (p === "asc" ? "desc" : "asc")); return; }

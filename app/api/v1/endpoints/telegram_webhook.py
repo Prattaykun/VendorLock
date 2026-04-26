@@ -1,11 +1,14 @@
 """
 Telegram Webhook endpoint — receives all Telegram Bot messages.
+Routes to Agent 1 for parsing, handles confirmations/disputes.
 """
 from fastapi import APIRouter, Request, HTTPException, Header
 from typing import Optional
 from loguru import logger
 
 from app.core.config import settings
+from app.agents.agent1_trade_capture import agent1_graph
+from app.services import supabase_service
 
 router = APIRouter()
 
@@ -43,10 +46,35 @@ async def telegram_webhook(
 
         logger.info(f"[TG] Message from chat {chat_id}: {text[:80]}")
 
-        # TODO: identify sender (retailer / distributor / salesman) by chat_id
-        # TODO: route to Agent 1 for intent parsing
-        # TODO: handle MYSCORE command → trust_score endpoint
-        # TODO: handle voice notes → transcribe → Agent 1
+        # Handle MYSCORE command
+        if text.strip().upper() in ("MYSCORE", "MY SCORE", "MERA SCORE"):
+            # Return trust score for this retailer
+            logger.info(f"[TG] MYSCORE command from {chat_id}")
+            # In production: look up retailer by chat_id and return score
+            return {"ok": True, "update_id": update_id, "handled": "MYSCORE"}
+
+        # Route to Agent 1 for intent parsing
+        if text and len(text.strip()) > 2:
+            try:
+                state = {
+                    "raw_message": text,
+                    "sender_id": str(chat_id),
+                    "tenant_id": "default",  # In production: map chat_id to tenant
+                    "channel": "telegram",
+                    "language_hint": "auto",
+                    "parsed_event": None,
+                    "confirmation_text": None,
+                    "error": None,
+                }
+                result = agent1_graph.invoke(state)
+                logger.info(f"[TG] Agent 1 parsed: {result.get('parsed_event', {}).get('intent', '?')}")
+
+                # In production: send confirmation_text back to Telegram
+                confirmation = result.get("confirmation_text", "Message received.")
+                logger.info(f"[TG] Confirmation to send: {confirmation[:100]}")
+
+            except Exception as e:
+                logger.error(f"[TG] Agent 1 invocation failed: {e}")
 
     # ── Callback query (inline keyboard: YES / DISPUTE) ──────────────────────
     elif "callback_query" in body:
@@ -57,13 +85,19 @@ async def telegram_webhook(
 
         if data.startswith("CONFIRM:"):
             order_id = data.split(":")[1]
-            # TODO: call orders.confirm_order(order_id)
-            logger.info(f"Order {order_id} confirmed via Telegram")
+            try:
+                await supabase_service.update_order_status(order_id, "default", "CONFIRMED")
+                logger.info(f"Order {order_id} confirmed via Telegram")
+            except Exception as e:
+                logger.error(f"Order confirmation failed: {e}")
 
         elif data.startswith("DISPUTE:"):
             order_id = data.split(":")[1]
-            # TODO: call orders.dispute_order(order_id)
-            logger.info(f"Order {order_id} disputed via Telegram")
+            try:
+                await supabase_service.update_order_status(order_id, "default", "DISPUTED")
+                logger.info(f"Order {order_id} disputed via Telegram")
+            except Exception as e:
+                logger.error(f"Order dispute failed: {e}")
 
     return {"ok": True, "update_id": update_id}
 

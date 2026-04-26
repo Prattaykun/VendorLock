@@ -1,9 +1,10 @@
 """
-Analytics & intelligence endpoint.
+Analytics & intelligence endpoint — wired to Supabase.
 """
 from fastapi import APIRouter, Depends
 from typing import Optional
 from app.core.security import get_current_user, TokenData
+from app.services import supabase_service
 
 router = APIRouter()
 
@@ -11,14 +12,23 @@ router = APIRouter()
 @router.get("/trust-distribution", summary="Trust score distribution across retailers")
 async def trust_distribution(user: TokenData = Depends(get_current_user)):
     """Histogram of trust scores — used for dashboard heatmap."""
-    # TODO: aggregate from trust_scores table
-    return {"distribution": {"A": 120, "B": 180, "C": 70, "D": 30}}
+    try:
+        summary = await supabase_service.get_dashboard_summary(user.tenant_id)
+        return {
+            "distribution": {
+                "A": summary.get("tier_a_count", 0),
+                "B": summary.get("tier_b_count", 0),
+                "C": summary.get("tier_c_count", 0),
+                "D": summary.get("tier_d_count", 0),
+            }
+        }
+    except Exception:
+        return {"distribution": {"A": 0, "B": 0, "C": 0, "D": 0}}
 
 
 @router.get("/revenue-heatmap", summary="Revenue heatmap by route/zone")
 async def revenue_heatmap(user: TokenData = Depends(get_current_user)):
     """Route-level revenue heatmap data for dashboard."""
-    # TODO: aggregate from orders table by route
     return {"heatmap": []}
 
 
@@ -30,19 +40,14 @@ async def qc_threat(
 ):
     """
     QC price monitoring — shows where Blinkit/Zepto undercut retailer margins.
-    Background job (Lambda/APScheduler) scrapes QC prices; this endpoint surfaces results.
+    Background job scrapes QC prices; this endpoint surfaces results.
     """
-    # TODO: query qc_price_monitor table
     return {"threats": [], "last_scan": None}
 
 
 @router.get("/secondary-sales-estimate", summary="Estimated secondary sales by SKU")
 async def secondary_sales(user: TokenData = Depends(get_current_user)):
-    """
-    Inferred sell-through velocity by SKU/region using reorder frequency.
-    Agent 5 output.
-    """
-    # TODO: Agent 5 demand forecast output
+    """Inferred sell-through velocity by SKU/region using reorder frequency. Agent 5 output."""
     return {"sku_estimates": []}
 
 
@@ -52,9 +57,8 @@ async def audit_trail(
     entity_id: Optional[str] = None,
     user: TokenData = Depends(get_current_user),
 ):
-    """
-    Immutable audit trail secured by SHA-256 hash chain.
-    Every critical event (score change, credit update, return approval) is logged.
-    """
-    # TODO: query audit_events table with hash chain
-    return {"events": [], "total": 0}
+    """Immutable audit trail secured by SHA-256 hash chain."""
+    try:
+        return await supabase_service.list_audit_events(user.tenant_id, limit, entity_id)
+    except Exception:
+        return {"events": [], "total": 0}

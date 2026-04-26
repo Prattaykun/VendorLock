@@ -40,8 +40,13 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
     GOOGLE_API_KEY: str = ""
-    DEFAULT_LLM_PROVIDER: str = "anthropic"
-    DEFAULT_LLM_MODEL: str = "claude-3-5-sonnet-20241022"
+    DEFAULT_LLM_PROVIDER: str = "nvidia"
+    DEFAULT_LLM_MODEL: str = "deepseek-ai/deepseek-v4-pro"
+
+    # ── NVIDIA NIM ────────────────────────────────────────────────────────────
+    NVIDIA_API_KEY: str = ""
+    NVIDIA_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
+    NVIDIA_MODEL: str = "deepseek-ai/deepseek-v4-pro"
 
     # ── Telegram ─────────────────────────────────────────────────────────────
     TELEGRAM_BOT_TOKEN: str = ""

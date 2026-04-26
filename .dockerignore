@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.env.local
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+distributor/node_modules/
+distributor/.next/
+distributor/out/
+distributor/build/

@@ -26,25 +26,25 @@ async def init_db():
             max_size=20,
             command_timeout=60,
         )
-        logger.info("✅ PostgreSQL pool initialised")
+        logger.info("PostgreSQL pool initialised")
     except Exception as e:
-        logger.warning(f"⚠️  PostgreSQL pool failed (non-fatal in dev): {e}")
+        logger.warning(f"PostgreSQL pool failed (non-fatal in dev): {e}")
 
     # MongoDB
     try:
-        _mongo_client = AsyncIOMotorClient(settings.MONGODB_URI)
+        _mongo_client = AsyncIOMotorClient(settings.MONGODB_URI, serverSelectionTimeoutMS=2000)
         await _mongo_client.server_info()
-        logger.info("✅ MongoDB connected")
+        logger.info("MongoDB connected")
     except Exception as e:
-        logger.warning(f"⚠️  MongoDB connection failed (non-fatal in dev): {e}")
+        logger.warning(f"MongoDB connection failed (non-fatal in dev): {e}")
 
     # Supabase client
     if settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY:
         try:
             _supabase_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
-            logger.info("✅ Supabase client initialised")
+            logger.info("Supabase client initialised")
         except Exception as e:
-            logger.warning(f"⚠️  Supabase init failed: {e}")
+            logger.warning(f"Supabase init failed: {e}")
 
 
 async def close_db():
@@ -70,6 +70,15 @@ def get_mongo_db():
 
 
 def get_supabase() -> Client:
+    global _supabase_client
     if _supabase_client is None:
-        raise RuntimeError("Supabase client not initialised")
+        # Lazy init — create client on first access
+        if settings.SUPABASE_URL and settings.SUPABASE_ANON_KEY:
+            try:
+                _supabase_client = create_client(settings.SUPABASE_URL, settings.SUPABASE_ANON_KEY)
+                logger.info("✅ Supabase client lazy-initialised")
+            except Exception as e:
+                raise RuntimeError(f"Supabase client init failed: {e}")
+        else:
+            raise RuntimeError("Supabase URL or anon key not configured in .env")
     return _supabase_client
