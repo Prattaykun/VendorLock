@@ -23,8 +23,8 @@ const hindiSans = Noto_Sans_Devanagari({
 });
 
 export const metadata: Metadata = {
-  title: "VendorLock Distributor Dashboard",
-  description: "Human-in-the-loop control tower for distributor decisions.",
+  title: "VendorLock AI",
+  description: "Advanced Trade Intelligence & Risk Management Platform",
 };
 
 export default function RootLayout({
