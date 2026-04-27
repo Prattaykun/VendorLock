@@ -40,10 +40,15 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""
     OPENAI_API_KEY: str = ""
     GOOGLE_API_KEY: str = ""
-    DEFAULT_LLM_PROVIDER: str = "nvidia"
-    DEFAULT_LLM_MODEL: str = "deepseek-ai/deepseek-v4-pro"
+    DEFAULT_LLM_PROVIDER: str = "vertex"  # vertex | nvidia
+    DEFAULT_LLM_MODEL: str = "gemini-2.5-flash"
 
-    # ── NVIDIA NIM ────────────────────────────────────────────────────────────
+    # ── Google Vertex AI ──────────────────────────────────────────────────────
+    VERTEX_PROJECT: str = "project-5af0c4b2-88c4-475e-9f1"
+    VERTEX_LOCATION: str = "us-central1"
+    VERTEX_MODEL: str = "gemini-2.5-flash"
+
+    # ── NVIDIA NIM (DeepSeek fallback) ────────────────────────────────────────
     NVIDIA_API_KEY: str = ""
     NVIDIA_BASE_URL: str = "https://integrate.api.nvidia.com/v1"
     NVIDIA_MODEL: str = "deepseek-ai/deepseek-v4-pro"
