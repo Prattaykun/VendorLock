@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     description=(
-        "VendorLock AI Trade Intelligence Platform "
+        "VendorLock AI Trade Intelligence Platform--"
         "FastAPI Backend for FMCG & HORECA Distribution"
     ),
     version=settings.APP_VERSION,
