@@ -18,7 +18,7 @@ export default function CreditDecisionPanel({ onAction }: Props) {
   const [editMsg, setEditMsg] = useState("");
 
   return (
-    <section className="ml-64 mt-[64px] p-8 max-w-[1600px] mx-auto flex flex-col gap-6">
+    <section className="mt-6 p-6 w-full max-w-[1400px] mx-auto flex flex-col gap-6">
       {/* Header Section */}
       <motion.div {...fadeUp} className="flex justify-between items-end pb-2 border-b border-slate-800">
         <div>
@@ -61,9 +61,9 @@ export default function CreditDecisionPanel({ onAction }: Props) {
       )}
 
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-12 gap-6 h-[calc(100vh-280px)] min-h-[600px]">
+      <div className="grid grid-cols-12 gap-6 h-[calc(100vh-220px)] min-h-[640px]">
         {/* Left Pane: Queue (8 cols) */}
-        <div className="col-span-8 flex flex-col gap-4">
+        <div className="col-span-8 flex flex-col gap-4 min-w-0">
           {/* Queue Headers */}
           <div className="grid grid-cols-12 gap-6 px-5 pb-3 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-800">
             <div className="col-span-3">Vendor / Order</div>
@@ -74,7 +74,7 @@ export default function CreditDecisionPanel({ onAction }: Props) {
           </div>
 
           {/* Queue List (Scrollable) */}
-          <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-2">
+          <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-4">
             {creditOrders.map((co, i) => (
               <motion.div
                 key={co.id}
@@ -140,7 +140,7 @@ export default function CreditDecisionPanel({ onAction }: Props) {
         </div>
 
         {/* Right Pane: Action & Comms (4 cols) */}
-        <div className="col-span-4 flex flex-col h-full bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl overflow-hidden relative shadow-2xl">
+        <div className="col-span-4 sticky top-24 flex flex-col h-full bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl overflow-hidden relative shadow-2xl">
           <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-700/40 to-transparent"></div>
           
           <div className="p-6 border-b border-slate-800 bg-slate-800/30">
@@ -148,9 +148,9 @@ export default function CreditDecisionPanel({ onAction }: Props) {
             <p className="text-sm text-slate-400">V-8922: Metro Mart • ORD-77A-901</p>
           </div>
 
-          <div className="flex-1 p-6 flex flex-col gap-8 overflow-y-auto">
+          <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
             {/* --- CLEAN POLICY VIOLATION ALERT --- */}
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-5 mb-8 relative overflow-hidden">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-5 mb-6 relative overflow-hidden">
                
               {/* Header Row: Title & Percentage */}
               <div className="flex justify-between items-start mb-4">
@@ -192,7 +192,7 @@ export default function CreditDecisionPanel({ onAction }: Props) {
             </div>
 
             {/* Communication Draft */}
-            <div className="flex flex-col gap-4 mt-auto pt-6 border-t border-slate-800">
+              <div className="flex flex-col gap-4 mt-auto pt-6 border-t border-slate-800">
               <div className="flex justify-between items-center">
                 <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> Vendor Comms

@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>VendorLock - Beat Intelligence</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-highest": "#2a3548",
+                    "on-secondary-fixed": "#0b1c30",
+                    "on-error": "#690005",
+                    "surface-container": "#152031",
+                    "on-primary-fixed": "#001a42",
+                    "surface-tint": "#adc6ff",
+                    "surface-container-low": "#111c2d",
+                    "secondary": "#b7c8e1",
+                    "background": "#081425",
+                    "on-surface": "#d8e3fb",
+                    "tertiary-fixed": "#dae2fd",
+                    "surface-bright": "#2f3a4c",
+                    "on-surface-variant": "#c2c6d6",
+                    "primary-fixed": "#d8e2ff",
+                    "primary": "#adc6ff",
+                    "surface-container-high": "#1f2a3c",
+                    "on-background": "#d8e3fb",
+                    "on-secondary-container": "#a9bad3",
+                    "on-tertiary-fixed": "#131b2e",
+                    "inverse-on-surface": "#263143",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "primary-fixed-dim": "#adc6ff",
+                    "surface": "#081425",
+                    "on-primary": "#002e6a",
+                    "surface-variant": "#2a3548",
+                    "surface-dim": "#081425",
+                    "secondary-fixed-dim": "#b7c8e1",
+                    "tertiary": "#bec6e0",
+                    "secondary-fixed": "#d3e4fe",
+                    "on-secondary-fixed-variant": "#38485d",
+                    "secondary-container": "#3a4a5f",
+                    "surface-container-lowest": "#040e1f",
+                    "on-primary-container": "#00285d",
+                    "inverse-primary": "#005ac2",
+                    "outline-variant": "#424754",
+                    "inverse-surface": "#d8e3fb",
+                    "tertiary-container": "#8990a8",
+                    "outline": "#8c909f",
+                    "on-secondary": "#213145",
+                    "primary-container": "#4d8eff",
+                    "error": "#ffb4ab",
+                    "on-primary-fixed-variant": "#004395",
+                    "on-tertiary": "#283044",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "on-error-container": "#ffdad6",
+                    "error-container": "#93000a",
+                    "on-tertiary-container": "#22293d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "margin": "2rem",
+                    "xs": "0.25rem",
+                    "xl": "2rem",
+                    "max-width": "1600px",
+                    "sm": "0.5rem",
+                    "lg": "1.5rem",
+                    "md": "1rem",
+                    "gutter": "1.5rem"
+            },
+            "fontFamily": {
+                    "label-md": ["Inter", "sans-serif"],
+                    "mono-data": ["Inter", "monospace"],
+                    "body-sm": ["Inter", "sans-serif"],
+                    "display-xl": ["Inter", "sans-serif"],
+                    "headline-lg": ["Inter", "sans-serif"],
+                    "body-md": ["Inter", "sans-serif"],
+                    "headline-md": ["Inter", "sans-serif"],
+                    "body-lg": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                    "mono-data": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                    "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                    "display-xl": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                    "headline-lg": ["30px", { "lineHeight": "38px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                    "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                    "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                    "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        /* Custom scrollbar for data tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.5); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background flex h-screen overflow-hidden antialiased">
+<!-- Shared Component: SideNavBar -->
+<nav class="bg-slate-950 h-screen w-64 border-r fixed left-0 top-0 z-40 border-slate-800 shadow-[4px_0_24px_rgba(0,0,0,0.5)] flex flex-col py-6">
+<div class="px-6 mb-8 flex items-center gap-3">
+<img alt="System Administrator" class="w-10 h-10 rounded-full border border-slate-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSGOVGuQFNtQCppOQak2rwCjS5buoBEsb-l0GGWIcjrlU5wv-vR9LJ9-rS9DICdC6udiXtNrqvGwylOhn3nzxLKW9HdNivTGe92QcSNpx9Jj9T0zcl2-Clkk2yhmcbDqIup3-beJHTbV8UwcS811bDwpo8RTuJ7KkIf-L7bt5CKeOuXUzI1X5ZqBqslVFCTIyJzF0kEFfbgLdlyj3MqqTU-Q6fHXjKzItObxFbPoMq_dwpnJzgH8Wj0hvVqwBSHiCSeXKTjamc"/>
+<div>
+<h2 class="text-blue-500 font-bold font-label-md text-label-md uppercase tracking-widest">Mission Control</h2>
+<p class="text-slate-400 font-label-md text-label-md text-[10px]">Global Vanguard</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto">
+<ul class="flex flex-col font-inter text-sm font-medium">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-900 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span>Command Center</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-900 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">map</span>
+<span>Trust Map</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-900 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span>Credit Decisions</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-900 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">security</span>
+<span>Scheme Leakage</span>
+</a>
+</li>
+<!-- ACTIVE ITEM -->
+<li>
+<a class="flex items-center gap-3 px-4 py-3 bg-blue-500/10 text-blue-400 border-r-2 border-blue-500" href="#">
+<span class="material-symbols-outlined icon-fill">insights</span>
+<span>Beat Intelligence</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-900 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">assignment_return</span>
+<span>Expiry &amp; Returns</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:text-slate-300 hover:bg-slate-900 transition-all duration-200 hover:translate-x-1" href="#">
+<span class="material-symbols-outlined">history</span>
+<span>Audit Trail</span>
+</a>
+</li>
+</ul>
+</div>
+<div class="px-6 mt-auto">
+<button class="w-full py-2 bg-blue-500/20 text-blue-400 border border-blue-500/50 rounded flex justify-center items-center gap-2 hover:bg-blue-500/30 transition-colors">
+<span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+<span class="font-label-md text-label-md">Live Status</span>
+</button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-64 flex flex-col relative overflow-hidden h-screen bg-surface-lowest">
+<!-- Background Image with Overlay -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-30 mix-blend-luminosity" data-alt="Logistics integrated command center with holographic displays" src="https://lh3.googleusercontent.com/aida/ADBb0uhiSeOK_Ot9ej-cQf2MwgxjjbYCsoRirHLNUu2p-px2qORi-M6rMOEWG3LRt15LKHvE0vOkQ2TaimhHlRcpPeCtQe0UxKVotCgHmX64q3JtZw42O_sJdqABnkMxckwcek7yYG9zFtWtqUzezLW3S2QsUKBnqvEstJa3k492oiNryoorGDXVfR6-8zEge4VOjEPyAWZEfAtdEJjK1AC66YJ8tdqCdNUHpoGAvxr6DJkk_N1RQPiTH_rwrbKbKeep2a9Vl75ZyDY"/>
+<div class="absolute inset-0 bg-background/80 backdrop-blur-[2px]"></div>
+</div>
+<!-- Shared Component: TopAppBar -->
+<header class="bg-slate-950/80 backdrop-blur-xl docked full-width top-0 border-b z-50 border-slate-800 shadow-lg shadow-blue-500/5 flex justify-between items-center w-full px-6 py-3 font-inter antialiased tracking-tight relative z-10">
+<div class="flex items-center gap-4">
+<h1 class="text-lg font-black tracking-widest text-blue-500 uppercase">LOGISTICS CONTROL</h1>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search on right as per JSON -->
+<div class="relative hidden md:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="bg-slate-900/50 border border-slate-800 text-slate-200 text-sm rounded-full pl-9 pr-4 py-1.5 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 w-64 transition-all" placeholder="Search parameters..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-slate-400 hover:text-slate-200 transition-colors hover:bg-slate-900/50 cursor-pointer p-1.5 rounded-full active:scale-98 transition-transform duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-slate-400 hover:text-slate-200 transition-colors hover:bg-slate-900/50 cursor-pointer p-1.5 rounded-full active:scale-98 transition-transform duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="text-slate-400 hover:text-slate-200 transition-colors hover:bg-slate-900/50 cursor-pointer p-1.5 rounded-full active:scale-98 transition-transform duration-150">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="w-px h-6 bg-slate-800"></div>
+<img alt="Chief Logistics Coordinator Avatar" class="w-8 h-8 rounded-full border border-slate-700 cursor-pointer hover:border-blue-500 transition-colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHxYo1fC8E2Dt0aS9D0cDSYw_3nMMyG7voPPsQn6J-SymcZppNhKWNX110UnGLjN0ljMFPtStRX3N52mNEOhW95Knx6FR8YXIl5sEs75rkWZuU_1Uqj_RK1TO8xnWZkmgoSwt7eyWmyVGV9GC1iKw76z_kx5mCPhc7fZ9FWX3zfdoCOqL1P9DU66YkfNJT1P9SqpdT9mUnUR6j-mhoARXWWgk-oIJJwBOMTU3ofnYS4YsNsk2PT9u81d_YSE1omyZzuce9t8Ik"/>
+</div>
+</header>
+<!-- Canvas Content -->
+<div class="flex-1 overflow-y-auto relative z-10 p-margin">
+<div class="max-w-[1600px] mx-auto flex flex-col gap-gutter">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-2">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Beat Intelligence</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Real-time territorial monitoring and salesman efficacy tracking.</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-lg">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-label-md text-label-md text-on-surface">14 Ghost Alerts</span>
+</div>
+<div class="flex items-center gap-2 bg-surface-container border border-outline-variant px-3 py-1.5 rounded-lg">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-md text-label-md text-on-surface">Live Sync: Active</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Widget: Coverage Heatmap (Col span 8, Top) -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container border border-outline-variant rounded-xl shadow-lg relative flex flex-col h-[400px] overflow-hidden">
+<!-- Top Edge Highlight -->
+<div class="absolute top-0 left-0 right-0 h-px bg-surface-bright/50"></div>
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container/50 backdrop-blur-md absolute top-0 left-0 right-0 z-10">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">satellite_alt</span>
+                                Coverage Heatmap
+                            </h3>
+<div class="flex gap-3 font-label-md text-label-md text-on-surface-variant">
+<span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-primary-container border border-primary"></span> Optimal</span>
+<span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-tertiary-container border border-tertiary"></span> At Risk</span>
+<span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-error-container border border-error"></span> Critical</span>
+</div>
+</div>
+<!-- Map Area -->
+<div class="flex-1 relative w-full h-full bg-surface-container-low" data-location="Mumbai" style="">
+<img class="w-full h-full object-cover opacity-40 grayscale" data-alt="Dark stylized satellite map of a coastal city resembling Mumbai, technical aesthetic with low contrast roads and dark water" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD14Y5nc64LWv6gBGOhihBlaTRW7GYr57Y_aikYdcGQaVqeiz3C4Aj-ECEgeHtkXUSBHQbLv9aeNn5CRJ-0SrnnAdGFA9WoqSMeoihqtW0QjbvykSRkQi2wLeUHOdFF7UJAAiZVD_2g5qxW86NkxQz1pgYMi6SIg2vQYH9VLZsSgC2X1rr4nhV1jd-BjVeD-DD6i_MQYn7REj7kp4fsW3NctyEjRax3wRxVJUeFVlLANX95LYflxVAtE3JyL-ETBbiRX6OKMEqj"/>
+<!-- Heatmap Overlay Elements (Absolute positioned for demo) -->
+<div class="absolute top-1/4 left-1/4 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
+<div class="absolute bottom-1/3 right-1/3 w-48 h-48 bg-error/20 rounded-full blur-2xl"></div>
+<div class="absolute top-1/2 left-1/2 w-24 h-24 bg-tertiary/20 rounded-full blur-xl"></div>
+<!-- Pin Data Points -->
+<div class="absolute top-[30%] left-[25%] flex flex-col items-center group cursor-pointer">
+<div class="w-4 h-4 bg-primary border-2 border-surface-container rounded-full shadow-[0_0_10px_rgba(77,142,255,0.5)]"></div>
+<div class="hidden group-hover:block absolute top-6 bg-surface-container-highest border border-outline-variant p-2 rounded text-xs whitespace-nowrap z-20 backdrop-blur-xl">
+<p class="font-label-md text-label-md text-primary">Pin: 400001</p>
+<p class="font-body-sm text-body-sm text-on-surface">Coverage: 94%</p>
+</div>
+</div>
+<div class="absolute bottom-[40%] right-[35%] flex flex-col items-center group cursor-pointer">
+<div class="w-4 h-4 bg-error border-2 border-surface-container rounded-full shadow-[0_0_10px_rgba(255,180,171,0.5)] animate-pulse"></div>
+<div class="hidden group-hover:block absolute top-6 bg-surface-container-highest border border-outline-variant p-2 rounded text-xs whitespace-nowrap z-20 backdrop-blur-xl">
+<p class="font-label-md text-label-md text-error">Pin: 400053</p>
+<p class="font-body-sm text-body-sm text-on-surface">Coverage: 42% (Critical)</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Widget: Salesman Cards (Col span 4, Top Right) -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-4 h-[400px]">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2 h-10">
+<span class="material-symbols-outlined text-secondary">groups</span>
+                            Field Operatives
+                        </h3>
+<div class="flex-1 overflow-y-auto pr-2 flex flex-col gap-3">
+<!-- Card 1 -->
+<div class="bg-surface-container border border-outline-variant rounded-lg p-3 relative hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="absolute top-0 left-0 right-0 h-px bg-surface-bright/30"></div>
+<div class="flex items-center gap-3 mb-2">
+<img alt="Operative Avatar" class="w-10 h-10 rounded border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAP7uJ2RI5HI268AObw5kJOpFdwgk3I2iwr5lVH0Q5uDqYrGLcQVOrWY2NE7umZqoSbMAeCv_FlKdSRhL-MvTHBvVp89QaoisHTGzE0hduU2Z6FhVBWSMHPz6glI0x-Wz9idtQcxMM1zgHGFaHL49MjIWO27PswC86GEEZqkN3YV0WlurYUfZCm4HhYljkegbdQfZ3ci1HC-CnrrZl2xmeGclQMqhlQOTrl7rQjYNHHbzyb02OZAt7dQb7sD6rCgjigZhMN_N_I"/>
+<div class="flex-1">
+<h4 class="font-body-md text-body-md text-on-surface font-semibold">Rajeev Sharma</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">Zone Alpha</p>
+</div>
+<div class="text-right">
+<div class="font-mono-data text-mono-data text-primary">92%</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[10px]">Reliability</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 bg-surface-container-highest p-2 rounded border border-outline-variant/50">
+<div class="text-center">
+<div class="font-mono-data text-mono-data text-on-surface">45</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase">Outlets</div>
+</div>
+<div class="text-center border-x border-outline-variant/30">
+<div class="font-mono-data text-mono-data text-tertiary">38</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase">2-Way</div>
+</div>
+<div class="text-center">
+<div class="font-mono-data text-mono-data text-on-surface">0</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase text-error">Ghosts</div>
+</div>
+</div>
+</div>
+<!-- Card 2 (Problematic) -->
+<div class="bg-surface-container border border-error/30 rounded-lg p-3 relative hover:bg-surface-container-high transition-colors group cursor-pointer shadow-[inset_0_0_20px_rgba(255,180,171,0.05)]">
+<div class="absolute top-0 left-0 right-0 h-px bg-error/20"></div>
+<div class="flex items-center gap-3 mb-2">
+<img alt="Operative Avatar" class="w-10 h-10 rounded border border-error/50" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9p0p5LCpR9dbLFrxoxYTLX5hqvtrBSs1SkwHZaVGjqjeoU0iCZzD7o7SJDWX5SYPn4dTL573N5tp2URMVKNG7r3gVQhMryEy2_19rvtZXeF_UAZkF5e18zF9Q9OST8MPdjDTXvWU9H4anISDfVwfmLRT2tnE27g5H5wWBsjU9gboZ4z6vz1YY6M73MhWMhMgXmhhpEWnwykzvf_0odgRtNsr8Fr7aYLPSUCeZ6e0NeDkokuJZPethaeDFiWMfbt_joL8AFs6I"/>
+<div class="flex-1">
+<h4 class="font-body-md text-body-md text-on-surface font-semibold">Amit Patel</h4>
+<p class="font-label-md text-label-md text-error">Zone Delta (Flagged)</p>
+</div>
+<div class="text-right">
+<div class="font-mono-data text-mono-data text-error">64%</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[10px]">Reliability</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 bg-surface-container-highest p-2 rounded border border-outline-variant/50">
+<div class="text-center">
+<div class="font-mono-data text-mono-data text-on-surface">52</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase">Outlets</div>
+</div>
+<div class="text-center border-x border-outline-variant/30">
+<div class="font-mono-data text-mono-data text-tertiary">21</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase">2-Way</div>
+</div>
+<div class="text-center">
+<div class="font-mono-data text-mono-data text-error font-bold">12</div>
+<div class="font-label-md text-label-md text-error text-[9px] uppercase">Ghosts</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container border border-outline-variant rounded-lg p-3 relative hover:bg-surface-container-high transition-colors group cursor-pointer">
+<div class="absolute top-0 left-0 right-0 h-px bg-surface-bright/30"></div>
+<div class="flex items-center gap-3 mb-2">
+<img alt="Operative Avatar" class="w-10 h-10 rounded border border-outline-variant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDIW7mImi4HavVHvfuiIsSQIl1TQqtx4lq8SJGlkEBcgtjRI1tFTCxhTJMdP_IA1inilxoHgnrwEN0c491w6qqTW_ZuotM_GMUHU54qTX94wAWGxTZwJBc1AO0-9v2x3VZivMGptZgltdCFCVT3-GZxQmkhvrp9Yw7EF3LSkZgK1aKWynEAGBIvmpT4ILUtOsBbhVz4nj8bJAZV0-ad_if9igYQUuBXy6MYn1G2PWfMlfjJaLXxWDOgpC1QzMhAXfi5vjkrQea"/>
+<div class="flex-1">
+<h4 class="font-body-md text-body-md text-on-surface font-semibold">Vikram Singh</h4>
+<p class="font-label-md text-label-md text-on-surface-variant">Zone Beta</p>
+</div>
+<div class="text-right">
+<div class="font-mono-data text-mono-data text-primary">88%</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[10px]">Reliability</div>
+</div>
+</div>
+<div class="grid grid-cols-3 gap-2 bg-surface-container-highest p-2 rounded border border-outline-variant/50">
+<div class="text-center">
+<div class="font-mono-data text-mono-data text-on-surface">30</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase">Outlets</div>
+</div>
+<div class="text-center border-x border-outline-variant/30">
+<div class="font-mono-data text-mono-data text-tertiary">28</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase">2-Way</div>
+</div>
+<div class="text-center">
+<div class="font-mono-data text-mono-data text-on-surface">2</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[9px] uppercase text-error">Ghosts</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Widget: Today's Beat Plan Table (Col span 7, Bottom Left) -->
+<div class="col-span-12 lg:col-span-7 bg-surface-container border border-outline-variant rounded-xl shadow-lg relative flex flex-col min-h-[300px]">
+<div class="absolute top-0 left-0 right-0 h-px bg-surface-bright/50"></div>
+<div class="p-md border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">route</span>
+                                Active Beat Plan
+                            </h3>
+<button class="text-primary hover:text-primary-fixed text-sm font-medium flex items-center gap-1">
+                                View Full Manifest <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-highest/50 border-b border-outline-variant">
+<th class="p-3 font-label-md text-label-md text-on-surface-variant uppercase">Outlet</th>
+<th class="p-3 font-label-md text-label-md text-on-surface-variant uppercase">Assigned To</th>
+<th class="p-3 font-label-md text-label-md text-on-surface-variant uppercase">Priority SKUs</th>
+<th class="p-3 font-label-md text-label-md text-on-surface-variant uppercase text-right">Risk Flags</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50 font-body-sm text-body-sm">
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="p-3 text-on-surface font-medium">Kirana King (Andheri)</td>
+<td class="p-3 text-on-surface-variant">Rajeev Sharma</td>
+<td class="p-3">
+<div class="flex gap-1">
+<span class="bg-primary-container/20 text-primary border border-primary/30 px-2 py-0.5 rounded text-xs">SKU-A1</span>
+<span class="bg-primary-container/20 text-primary border border-primary/30 px-2 py-0.5 rounded text-xs">SKU-B4</span>
+</div>
+</td>
+<td class="p-3 text-right">
+<span class="text-tertiary-fixed-dim text-xs border border-outline-variant px-2 py-1 rounded bg-surface-container">None</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors bg-error/5">
+<td class="p-3 text-on-surface font-medium">Metro Mart (Bandra)</td>
+<td class="p-3 text-error">Amit Patel</td>
+<td class="p-3">
+<div class="flex gap-1">
+<span class="bg-primary-container/20 text-primary border border-primary/30 px-2 py-0.5 rounded text-xs">SKU-C2 (High Value)</span>
+</div>
+</td>
+<td class="p-3 text-right flex justify-end gap-2">
+<span class="flex items-center gap-1 text-error text-xs border border-error/50 px-2 py-1 rounded bg-error-container/20" title="Historical GPS spoofing detected">
+<span class="material-symbols-outlined text-[14px]">location_off</span> GPS Anomaly
+                                            </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-high transition-colors">
+<td class="p-3 text-on-surface font-medium">Daily Needs (Powai)</td>
+<td class="p-3 text-on-surface-variant">Vikram Singh</td>
+<td class="p-3">
+<div class="flex gap-1">
+<span class="bg-primary-container/20 text-primary border border-primary/30 px-2 py-0.5 rounded text-xs">SKU-A1</span>
+</div>
+</td>
+<td class="p-3 text-right">
+<span class="text-tertiary-fixed-dim text-xs border border-outline-variant px-2 py-1 rounded bg-surface-container">None</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Widget: Ghost Visit Alerts (Col span 5, Bottom Right) -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container border border-outline-variant rounded-xl shadow-lg relative flex flex-col min-h-[300px]">
+<div class="absolute top-0 left-0 right-0 h-px bg-surface-bright/50"></div>
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-error-container/10">
+<h3 class="font-headline-md text-headline-md text-error flex items-center gap-2">
+<span class="material-symbols-outlined text-error">warning</span>
+                                Ghost Visit Alerts
+                            </h3>
+</div>
+<div class="flex-1 overflow-y-auto p-3 flex flex-col gap-3">
+<!-- Alert Item -->
+<div class="bg-surface-container-highest border border-error/40 rounded-lg p-3 flex flex-col gap-2 relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error rounded-l-lg"></div>
+<div class="flex justify-between items-start pl-2">
+<div>
+<h4 class="font-body-md text-body-md text-on-surface font-medium">Amit Patel <span class="text-on-surface-variant text-sm font-normal">at Metro Mart</span></h4>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 14:30 IST
+                                        </p>
+</div>
+<div class="text-right">
+<div class="font-mono-data text-mono-data text-error border border-error/30 bg-error/10 px-2 py-0.5 rounded">â¹ 12,500</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[10px] mt-1">Missed Projection</div>
+</div>
+</div>
+<div class="pl-2 pt-2 border-t border-outline-variant/30 flex justify-end gap-2">
+<button class="px-3 py-1 text-sm border border-outline-variant text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container-high transition-colors">Dismiss</button>
+<button class="px-3 py-1 text-sm bg-error text-on-error rounded hover:bg-error/90 transition-colors shadow-[0_0_10px_rgba(255,180,171,0.2)]">Trigger Audit</button>
+</div>
+</div>
+<!-- Alert Item -->
+<div class="bg-surface-container-highest border border-error/40 rounded-lg p-3 flex flex-col gap-2 relative">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error rounded-l-lg"></div>
+<div class="flex justify-between items-start pl-2">
+<div>
+<h4 class="font-body-md text-body-md text-on-surface font-medium">Amit Patel <span class="text-on-surface-variant text-sm font-normal">at City Store</span></h4>
+<p class="font-label-md text-label-md text-on-surface-variant mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">schedule</span> 11:15 IST
+                                        </p>
+</div>
+<div class="text-right">
+<div class="font-mono-data text-mono-data text-error border border-error/30 bg-error/10 px-2 py-0.5 rounded">â¹ 8,200</div>
+<div class="font-label-md text-label-md text-on-surface-variant text-[10px] mt-1">Missed Projection</div>
+</div>
+</div>
+<div class="pl-2 pt-2 border-t border-outline-variant/30 flex justify-end gap-2">
+<button class="px-3 py-1 text-sm border border-outline-variant text-on-surface-variant hover:text-on-surface rounded hover:bg-surface-container-high transition-colors">Dismiss</button>
+<button class="px-3 py-1 text-sm bg-error text-on-error rounded hover:bg-error/90 transition-colors shadow-[0_0_10px_rgba(255,180,171,0.2)]">Trigger Audit</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
