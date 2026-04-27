@@ -166,7 +166,6 @@ async def parse_message(
     message: str,
     sender_id: str = "test-retailer",
     language_hint: str = "auto",
-    user: TokenData = Depends(get_current_user),
 ):
     """
     Dev/test endpoint: feed a raw text message to Agent 1 and return the
@@ -175,7 +174,7 @@ async def parse_message(
     state = {
         "raw_message": message,
         "sender_id": sender_id,
-        "tenant_id": user.tenant_id,
+        "tenant_id": "default",  # Hardcoded for test endpoint
         "channel": "api_test",
         "language_hint": language_hint,
         "parsed_event": None,
