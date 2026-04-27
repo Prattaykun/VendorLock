@@ -73,6 +73,12 @@ export function returnVerdictClass(verdict: ReturnVerdict) {
 }
 
 export function coverageStatusClass(status: CoverageStatus) {
+  if (status === "VISITED_ORDERS") return "border-emerald-500 bg-emerald-500";
+  if (status === "VISITED_NO_ORDERS") return "border-amber-500 bg-amber-500";
+  return "border-rose-500 bg-rose-500";
+}
+
+export function coverageIndicatorClass(status: CoverageStatus) {
   if (status === "VISITED_ORDERS") return "bg-emerald-500";
   if (status === "VISITED_NO_ORDERS") return "bg-amber-500";
   return "bg-rose-500";

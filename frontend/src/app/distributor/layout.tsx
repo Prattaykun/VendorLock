@@ -27,25 +27,17 @@ export const metadata: Metadata = {
   description: "Human-in-the-loop control tower for distributor decisions.",
 };
 
-export default function RootLayout({
+export default function DistributorLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${hindiSans.variable} h-full antialiased`}
-      data-theme="dark"
-      suppressHydrationWarning
-    >
-      <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <TooltipProvider>{children}</TooltipProvider>
-          <Toaster position="bottom-right" />
-        </ThemeProvider>
-      </body>
-    </html>
+    <div className={`${geistSans.variable} ${geistMono.variable} ${hindiSans.variable} antialiased`}>
+      <ThemeProvider>
+        <TooltipProvider>{children}</TooltipProvider>
+        <Toaster position="bottom-right" />
+      </ThemeProvider>
+    </div>
   );
 }
-

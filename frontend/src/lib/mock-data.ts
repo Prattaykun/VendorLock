@@ -32,14 +32,14 @@ export const orderFeed: Order[] = [
 
 // ── Retailers ───────────────────────────────────────────────────────────────────
 export const retailers: Retailer[] = [
-  { id: "r-1", name: "Rao Mart", trustScore: 88, tier: "A", outstanding: 18000, creditLimit: 90000, lastPaymentDate: "2026-04-18", trend: "UP", factors: { paymentDiscipline: 92, orderConsistency: 84, cancellationRate: 87, returnFrequency: 91, communicationReliability: 82, tradeStability: 89 } },
-  { id: "r-2", name: "Sharma Kirana", trustScore: 61, tier: "B", outstanding: 38400, creditLimit: 70000, lastPaymentDate: "2026-04-07", trend: "DOWN", factors: { paymentDiscipline: 58, orderConsistency: 66, cancellationRate: 64, returnFrequency: 63, communicationReliability: 60, tradeStability: 62 } },
-  { id: "r-3", name: "Patel Stores", trustScore: 55, tier: "C", outstanding: 52000, creditLimit: 62000, lastPaymentDate: "2026-03-29", trend: "DOWN", factors: { paymentDiscipline: 48, orderConsistency: 59, cancellationRate: 51, returnFrequency: 57, communicationReliability: 61, tradeStability: 56 } },
-  { id: "r-4", name: "Gupta General", trustScore: 44, tier: "C", outstanding: 29100, creditLimit: 46000, lastPaymentDate: "2026-03-22", trend: "STABLE", factors: { paymentDiscipline: 42, orderConsistency: 47, cancellationRate: 45, returnFrequency: 44, communicationReliability: 48, tradeStability: 43 } },
-  { id: "r-5", name: "देसाई स्टोर्स", trustScore: 38, tier: "D", outstanding: 52000, creditLimit: 48000, lastPaymentDate: "2026-03-10", trend: "DOWN", factors: { paymentDiscipline: 31, orderConsistency: 40, cancellationRate: 35, returnFrequency: 37, communicationReliability: 42, tradeStability: 36 } },
-  { id: "r-6", name: "Verma Retail", trustScore: 72, tier: "B", outstanding: 32000, creditLimit: 78000, lastPaymentDate: "2026-04-14", trend: "UP", factors: { paymentDiscipline: 75, orderConsistency: 69, cancellationRate: 72, returnFrequency: 70, communicationReliability: 73, tradeStability: 74 } },
-  { id: "r-7", name: "Mehta & Co", trustScore: 49, tier: "C", outstanding: 26700, creditLimit: 59000, lastPaymentDate: "2026-04-01", trend: "STABLE", factors: { paymentDiscipline: 46, orderConsistency: 52, cancellationRate: 48, returnFrequency: 50, communicationReliability: 51, tradeStability: 47 } },
-  { id: "r-8", name: "Singh Traders", trustScore: 81, tier: "A", outstanding: 14200, creditLimit: 85000, lastPaymentDate: "2026-04-20", trend: "UP", factors: { paymentDiscipline: 85, orderConsistency: 78, cancellationRate: 82, returnFrequency: 80, communicationReliability: 77, tradeStability: 83 } },
+  { id: "r-1", name: "Rao Mart", hindiName: "राव मार्ट", trustScore: 88, tier: "A", outstanding: 18000, creditLimit: 90000, lastPaymentDate: "2026-04-18", trend: "UP", factors: { paymentDiscipline: 92, orderConsistency: 84, cancellationRate: 87, returnFrequency: 91, communicationReliability: 82, tradeStability: 89 } },
+  { id: "r-2", name: "Sharma General Store", hindiName: "शर्मा जनरल स्टोर", trustScore: 61, tier: "B", outstanding: 38400, creditLimit: 70000, lastPaymentDate: "2026-04-07", trend: "DOWN", factors: { paymentDiscipline: 58, orderConsistency: 66, cancellationRate: 64, returnFrequency: 63, communicationReliability: 60, tradeStability: 62 } },
+  { id: "r-3", name: "Patel Stores", hindiName: "पटेल स्टोर्स", trustScore: 55, tier: "C", outstanding: 52000, creditLimit: 62000, lastPaymentDate: "2026-03-29", trend: "DOWN", factors: { paymentDiscipline: 48, orderConsistency: 59, cancellationRate: 51, returnFrequency: 57, communicationReliability: 61, tradeStability: 56 } },
+  { id: "r-4", name: "Gupta Provisions", hindiName: "गुप्ता प्रोविज़न्स", trustScore: 44, tier: "C", outstanding: 29100, creditLimit: 46000, lastPaymentDate: "2026-03-22", trend: "STABLE", factors: { paymentDiscipline: 42, orderConsistency: 47, cancellationRate: 45, returnFrequency: 44, communicationReliability: 48, tradeStability: 43 } },
+  { id: "r-5", name: "Desai Wholesalers", hindiName: "देसाई होलसेलर्स", trustScore: 38, tier: "D", outstanding: 52000, creditLimit: 48000, lastPaymentDate: "2026-03-10", trend: "DOWN", factors: { paymentDiscipline: 31, orderConsistency: 40, cancellationRate: 35, returnFrequency: 37, communicationReliability: 42, tradeStability: 36 } },
+  { id: "r-6", name: "Verma Retail", hindiName: "वर्मा रिटेल", trustScore: 72, tier: "B", outstanding: 32000, creditLimit: 78000, lastPaymentDate: "2026-04-14", trend: "UP", factors: { paymentDiscipline: 75, orderConsistency: 69, cancellationRate: 72, returnFrequency: 70, communicationReliability: 73, tradeStability: 74 } },
+  { id: "r-7", name: "Mehta & Co", hindiName: "मेहता एंड कंपनी", trustScore: 49, tier: "C", outstanding: 26700, creditLimit: 59000, lastPaymentDate: "2026-04-01", trend: "STABLE", factors: { paymentDiscipline: 46, orderConsistency: 52, cancellationRate: 48, returnFrequency: 50, communicationReliability: 51, tradeStability: 47 } },
+  { id: "r-8", name: "Singh Traders", hindiName: "सिंह ट्रेडर्स", trustScore: 81, tier: "A", outstanding: 14200, creditLimit: 85000, lastPaymentDate: "2026-04-20", trend: "UP", factors: { paymentDiscipline: 85, orderConsistency: 78, cancellationRate: 82, returnFrequency: 80, communicationReliability: 77, tradeStability: 83 } },
 ];
 
 // ── Credit Orders ───────────────────────────────────────────────────────────────
@@ -74,9 +74,9 @@ export const retailerSchemes: RetailerScheme[] = [
 
 // ── Beat Intelligence ───────────────────────────────────────────────────────────
 export const salesmen: Salesman[] = [
-  { id: "sm-1", name: "Rahul Yadav", outletsAssigned: 42, outletsWithChat: 28, ghostVisitCount: 6, reliabilityScore: 54, missedRevenue: 14000 },
-  { id: "sm-2", name: "Amit Sharma", outletsAssigned: 38, outletsWithChat: 35, ghostVisitCount: 1, reliabilityScore: 91, missedRevenue: 2200 },
-  { id: "sm-3", name: "Vikram Patil", outletsAssigned: 45, outletsWithChat: 30, ghostVisitCount: 4, reliabilityScore: 68, missedRevenue: 9500 },
+  { id: "sm-1", name: "Rahul Yadav", outletsAssigned: 42, outletsWithChat: 28, ghostVisitCount: 6, reliabilityScore: 54, missedRevenue: 14000, avatarUrl: "https://i.pravatar.cc/150?img=11" },
+  { id: "sm-2", name: "Amit Sharma", outletsAssigned: 38, outletsWithChat: 35, ghostVisitCount: 1, reliabilityScore: 91, missedRevenue: 2200, avatarUrl: "https://i.pravatar.cc/150?img=33" },
+  { id: "sm-3", name: "Vikram Patil", outletsAssigned: 45, outletsWithChat: 30, ghostVisitCount: 4, reliabilityScore: 68, missedRevenue: 9500, avatarUrl: "https://i.pravatar.cc/150?img=60" },
 ];
 
 export const coverageZones: CoverageZone[] = [

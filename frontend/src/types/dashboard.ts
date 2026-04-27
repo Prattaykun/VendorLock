@@ -42,6 +42,7 @@ export interface RetailerFactors {
 export interface Retailer {
   id: string;
   name: string;
+  hindiName?: string;
   trustScore: number;
   tier: RetailerTier;
   outstanding: number;
@@ -104,6 +105,7 @@ export interface Salesman {
   ghostVisitCount: number;
   reliabilityScore: number;
   missedRevenue: number;
+  avatarUrl?: string;
 }
 
 export type CoverageStatus = "VISITED_ORDERS" | "VISITED_NO_ORDERS" | "NOT_VISITED";

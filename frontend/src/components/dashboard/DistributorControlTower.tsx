@@ -62,6 +62,25 @@ function factorData(r: Retailer) {
   ];
 }
 
+function ScoreBar({ label, value, color }: { label: string; value: number; color: "blue" | "orange" | "green" }) {
+  const colorClasses = {
+    blue: { bg: "bg-blue-500", text: "text-blue-400" },
+    orange: { bg: "bg-orange-500", text: "text-orange-400" },
+    green: { bg: "bg-emerald-500", text: "text-emerald-400" },
+  };
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-xs text-slate-400">{label}</span>
+        <span className={`text-xs font-mono font-medium ${colorClasses[color].text}`}>{value}%</span>
+      </div>
+      <div className="h-2 rounded-full bg-slate-700/50 overflow-hidden">
+        <div className={`h-full rounded-full ${colorClasses[color].bg}`} style={{ width: `${value}%` }} />
+      </div>
+    </div>
+  );
+}
+
 export default function DistributorControlTower() {
   const { theme, toggleTheme } = useTheme();
   const [activePanel, setActivePanel] = useState<PanelKey>("command-center");
@@ -69,7 +88,7 @@ export default function DistributorControlTower() {
   const [tierFilter, setTierFilter] = useState<"ALL" | RetailerTier>("ALL");
   const [sortBy, setSortBy] = useState<SortKey>("trustScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [selectedRetailer, setSelectedRetailer] = useState<Retailer | null>(null);
+  const [selectedRetailer, setSelectedRetailer] = useState<Retailer | null>(mockRetailers[0] || null);
   const [mobileNav, setMobileNav] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
@@ -247,23 +266,6 @@ export default function DistributorControlTower() {
                   <Badge className="rounded-full px-3 py-1.5 text-[11px] font-semibold bg-sky-500/10 text-sky-400 border-sky-500/20">{alertSummary.INFO} Info</Badge>
                 </div>
               </div>
-              {unresolvedCritical.length > 0 && (
-                <div className="rounded-r-xl p-4 relative overflow-hidden border-l-4 border-[#ff5793] bg-[#ff5793]/10 shadow-sm">
-                  <div className="relative">
-                    <div className="flex items-center gap-2 mb-2.5">
-                      <AlertTriangle size={14} className="text-[#ff5793]" />
-                      <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-white">Pinned Critical Alerts</p>
-                    </div>
-                    <ul className="space-y-1.5">
-                      {unresolvedCritical.map((a) => (
-                        <li key={a.id} className="text-[13px] text-zinc-200 leading-relaxed">
-                          <span className="font-semibold text-white">{a.title}:</span> {a.message}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              )}
             </div>
           </motion.header>
 
@@ -278,145 +280,314 @@ export default function DistributorControlTower() {
             </AnimatePresence>
 
             <AnimatePresence mode="wait">
-              {/* ── Panel 1: Command Center ───────────────────────── */}
+{/* ── Panel 1: Command Center ───────────────────────── */}
               {activePanel === "command-center" && (
-                <motion.section key="cmd" {...fadeUp} variants={stagger} className="grid gap-4 xl:grid-cols-[1.1fr_1fr]">
-                  <motion.div {...fadeUp}>
-                    <Card className="card-lift overflow-hidden relative bg-zinc-950 border border-white/10 shadow-2xl">
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-[#ff5793]/5 blur-3xl rounded-full pointer-events-none" />
-                      <CardHeader className="pb-3 relative z-10"><CardTitle className="text-[10px] uppercase tracking-[0.2em] font-medium flex items-center gap-2.5 text-zinc-400"><span className="dot-live relative inline-block h-2 w-2 rounded-full bg-cyan-400" style={{ boxShadow: "0 0 8px rgba(34,211,238,0.5)" }} />Pending Agent Actions</CardTitle></CardHeader>
-                      <CardContent className="space-y-3 relative z-10">
-                        {isDataLoading ? (
-                          Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="p-4 rounded-xl space-y-3" style={{ background: "var(--surface-inner)" }}>
-                              <div className="flex justify-between"><Skeleton className="h-4 w-32" /><Skeleton className="h-4 w-16" /></div>
-                              <Skeleton className="h-3 w-full" />
-                              <Skeleton className="h-3 w-3/4" />
+                <motion.section key="cmd" {...fadeUp} className="flex flex-col gap-6">
+                  {/* System Overview Section */}
+                  <div
+                    className="rounded-xl border p-6 flex flex-col md:flex-row justify-between items-center gap-6"
+                    style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", borderColor: "#424754", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
+                  >
+                    <div>
+                      <h2 className="text-xl font-semibold mb-1" style={{ color: "#d8e3fb" }}>System Overview</h2>
+                      <p className="text-sm flex items-center gap-2" style={{ color: "#c2c6d6" }}>
+                        <span className="w-2 h-2 rounded-full bg-[#adc6ff] animate-pulse"></span>
+                        Live data stream active across 14 global nodes.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {/* Critical */}
+                      <div className="rounded-lg px-4 py-3 flex items-center gap-4 min-w-[140px]" style={{ backgroundColor: "#1f2a3c", border: "1px solid #424754" }}>
+                        <div className="p-2 rounded-md" style={{ backgroundColor: "rgba(255, 180, 171, 0.1)" }}>
+                          <svg className="w-5 h-5" style={{ color: "#ffb4ab" }} fill="currentColor" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase" style={{ color: "#c2c6d6" }}>Critical</p>
+                          <p className="text-2xl font-bold" style={{ color: "#ffb4ab" }}>{alertSummary.CRITICAL}</p>
+                        </div>
+                      </div>
+                      {/* Pending */}
+                      <div className="rounded-lg px-4 py-3 flex items-center gap-4 min-w-[140px]" style={{ backgroundColor: "#1f2a3c", border: "1px solid #424754" }}>
+                        <div className="p-2 rounded-md" style={{ backgroundColor: "rgba(183, 200, 225, 0.1)" }}>
+                          <svg className="w-5 h-5" style={{ color: "#b7c8e1" }} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41 1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase" style={{ color: "#c2c6d6" }}>Pending</p>
+                          <p className="text-2xl font-bold" style={{ color: "#b7c8e1" }}>{alertSummary.WARNING}</p>
+                        </div>
+                      </div>
+                      {/* Cleared */}
+                      <div className="rounded-lg px-4 py-3 flex items-center gap-4 min-w-[140px]" style={{ backgroundColor: "#1f2a3c", border: "1px solid #424754" }}>
+                        <div className="p-2 rounded-md" style={{ backgroundColor: "rgba(77, 142, 255, 0.1)" }}>
+                          <svg className="w-5 h-5" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
+                        </div>
+                        <div>
+                          <p className="text-xs uppercase" style={{ color: "#c2c6d6" }}>Cleared</p>
+                          <p className="text-2xl font-bold" style={{ color: "#adc6ff" }}>892</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Bento Grid */}
+                  <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(12, 1fr)" }}>
+                    {/* Left Column (8 cols): Priority Actions */}
+                    <div className="col-span-12 lg:col-span-8 flex flex-col gap-4">
+                      {/* Priority Actions Header */}
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <h3 className="text-lg font-semibold" style={{ color: "#d8e3fb" }}>Priority Actions</h3>
+                          <p className="text-sm" style={{ color: "#c2c6d6" }}>Anomalies requiring immediate coordinator review.</p>
+                        </div>
+                        <button className="text-sm flex items-center gap-1" style={{ color: "#adc6ff" }}>
+                          View All <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" /></svg>
+                        </button>
+                      </div>
+
+                      {/* Action Cards */}
+                      {actionCards.map((card, i) => (
+                        <motion.div
+                          key={card.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          className="rounded-xl p-5"
+                          style={{ backgroundColor: "#152031", border: "1px solid #424754", boxShadow: "0 0 0 1px rgba(255,255,255,0.05)" }}
+                        >
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex gap-4">
+                              <div className="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold" style={{ backgroundColor: "#2a3548", border: "1px solid #8c909f", color: "#d8e3fb" }}>
+                                {card.retailerName.charAt(0)}
+                              </div>
+                              <div>
+                                <h4 className="text-lg font-semibold" style={{ color: "#d8e3fb" }}>{card.retailerName}</h4>
+                                <p className="text-sm font-mono" style={{ color: "#c2c6d6" }}>{card.issueType}</p>
+                              </div>
                             </div>
-                          ))
-                        ) : actionCards.map((card, i) => (
-                          <motion.div key={card.id} variants={fadeUp} whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
-                            <Card className="overflow-hidden card-lift hover:shadow-lg transition-shadow duration-300 bg-[#0f0f11] border border-white/10">
-                              <CardContent className="p-4">
-                                <div className="flex items-start justify-between gap-3">
-                                  <h3 className="text-base font-semibold leading-snug text-white">{card.retailerName}</h3>
-                                  <Badge className="shrink-0 rounded-lg px-2.5 py-1 text-xs bg-amber-500/10 border-amber-500/30 text-amber-400 font-semibold">{card.issueType}</Badge>
-                                </div>
-                                <p className="mt-2 text-sm leading-relaxed text-zinc-400">{card.recommendedAction}</p>
-                                <div className="mt-4 grid grid-cols-2 gap-2">
-                                  <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
-                                    <Button className="w-full h-9 bg-[#ff5793] hover:bg-[#ff3b7c] text-white font-semibold transition-colors text-[13px] border-0"
-                                      onClick={() => {
-                                        toast.success("AI Action Executed Successfully", { description: `Approved action for ${card.retailerName}` });
-                                        setLastAction(`Approved action for ${card.retailerName}`);
-                                      }}>✓ Approve</Button>
-                                  </motion.div>
-                                  <motion.div whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
-                                    <Button variant="ghost" className="w-full h-9 text-[13px] bg-[#1a1c22] hover:bg-[#272a33] text-white transition-colors border border-white/5"
-                                      onClick={() => setLastAction(`Opened edit draft for ${card.retailerName}`)}>✏ Edit & Send</Button>
-                                  </motion.div>
-                                </div>
-                              </CardContent>
-                            </Card>
-                          </motion.div>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-
-                  <div className="space-y-4">
-                    <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-                      <Card className="bg-zinc-950 border border-white/10 shadow-2xl">
-                        <CardHeader className="pb-3"><CardTitle className="text-[10px] uppercase tracking-[0.2em] font-medium flex items-center gap-2.5 text-zinc-400"><span className="dot-live relative inline-block h-2 w-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 8px rgba(16,185,129,0.5)" }} />Live Order Feed</CardTitle></CardHeader>
-                        <CardContent>
-                          <ScrollArea className="max-h-[320px] pr-1 space-y-1">
-                            {isDataLoading ? (
-                               Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="flex justify-between items-center py-3 px-4">
-                                  <div className="space-y-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-3 w-16" /></div>
-                                  <Skeleton className="h-6 w-16 rounded-full" />
-                                </div>
-                               ))
-                            ) : orderFeed.map((order, i) => (
-                              <motion.div key={order.id} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }} whileHover={{ scale: 1.02 }}
-                                className={`group flex items-center justify-between rounded-lg px-4 py-2.5 transition-all duration-300 hover:shadow-md ${i % 2 === 0 ? "bg-black/[0.02] dark:bg-white/[0.02]" : "bg-transparent hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"}`}>
-                                <div className="min-w-0">
-                                  <p className="font-medium text-sm truncate text-white group-hover:text-[#ff5793] transition-colors">{order.retailerName}</p>
-                                  <p className="text-xs font-mono text-zinc-400 mt-0.5">{formatInr(order.orderValue)} <span className="opacity-70 text-zinc-500">· {order.itemCount} items</span></p>
-                                </div>
-                                <div className="flex items-center gap-3 shrink-0">
-                                  <Badge className={`px-2 py-0.5 text-[10px] font-semibold ${orderStatusClass(order.status)}`}>
-                                    {order.status === "PENDING_CONFIRMATION" ? "Pending" : order.status === "CONFIRMED" ? "Confirmed" : "Blocked"}
-                                  </Badge>
-                                  <span className="text-[10px] text-zinc-600 font-mono">{formatTimeStable(order.createdAt)}</span>
-                                </div>
-                              </motion.div>
-                            ))}
-                          </ScrollArea>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-
-                    <motion.div {...fadeUp} transition={{ delay: 0.2 }}>
-                      <Card className="bg-zinc-950 border border-white/10 shadow-2xl">
-                        <CardHeader className="pb-3"><CardTitle className="text-[10px] uppercase tracking-[0.2em] font-medium flex items-center gap-2 text-zinc-400"><AlertTriangle size={13} className="text-amber-400" />Top 3 At-Risk Retailers</CardTitle></CardHeader>
-                        <CardContent className="space-y-2">
-                          {isDataLoading ? (
-                             Array.from({ length: 3 }).map((_, i) => (
-                              <div key={i} className="flex items-center justify-between rounded-xl px-4 py-3" style={{ background: "var(--surface-inner)" }}>
-                                <div className="space-y-2"><Skeleton className="h-4 w-28" /><Skeleton className="h-3 w-20" /></div>
-                                <Skeleton className="h-8 w-16" />
+                            <span className="px-2 py-1 rounded text-xs font-medium flex items-center gap-1" style={{ backgroundColor: "rgba(255, 180, 171, 0.1)", color: "#ffb4ab", border: "1px solid rgba(255, 180, 171, 0.2)" }}>
+                              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>
+                              Action Required
+                            </span>
+                          </div>
+                          <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: "rgba(4, 14, 31, 0.5)", border: "1px solid #424754" }}>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-xs uppercase mb-1" style={{ color: "#c2c6d6" }}>Issue Detected</p>
+                                <p className="text-sm" style={{ color: "#d8e3fb" }}>{card.recommendedAction.split('.')[0]}.</p>
                               </div>
-                             ))
-                          ) : atRiskRetailers.map((r) => (
-                            <motion.div key={r.id} whileHover={{ scale: 1.02 }} transition={{ type: "spring", stiffness: 300 }}>
-                              <div className="flex items-center justify-between rounded-xl px-4 py-3 hover:shadow-lg transition-all duration-300 bg-[#0f0f11] border border-white/10">
-                                <div>
-                                  <h3 className="font-medium text-white">{r.name}</h3>
-                                  <p className="text-xs font-mono text-zinc-400 mt-0.5">{formatInr(r.outstanding)} <span className="opacity-70 text-zinc-500">outstanding</span></p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                  <div className="text-right">
-                                    <p className={`text-lg font-bold ${scoreColor(r.trustScore)}`}>{r.trustScore}</p>
-                                    <p className="text-[10px] text-zinc-500">Trust Score</p>
-                                  </div>
-                                  <motion.div whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}>
-                                    <Button variant="outline" size="sm" className="h-8 gap-1.5 transition-colors hover:bg-black/10 border-white/10 text-white"
-                                      onClick={() => setLastAction(`Call shortcut for ${r.name}. Confirm manually.`)}><Phone size={12} /> Call</Button>
-                                  </motion.div>
-                                </div>
+                              <div>
+                                <p className="text-xs uppercase mb-1" style={{ color: "#c2c6d6" }}>System Recommendation</p>
+                                <p className="text-sm" style={{ color: "#d8e3fb" }}>{card.recommendedAction.split('.')[1] || "Review and approve action."}</p>
                               </div>
-                            </motion.div>
+                            </div>
+                          </div>
+                          <div className="flex gap-3 justify-end">
+                            <button className="px-4 py-2 rounded-lg border text-sm flex items-center gap-2" style={{ borderColor: "#424754", color: "#d8e3fb" }}>
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></svg>
+                              Edit & Send
+                            </button>
+                            <button className="px-4 py-2 rounded-lg text-sm flex items-center gap-2" style={{ backgroundColor: "#adc6ff", color: "#002e6a" }}>
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
+                              Approve Action
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+
+                      {/* KPI Metric Cards Grid */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="rounded-xl p-5 flex flex-col gap-3"
+                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs uppercase tracking-wider" style={{ color: "#c2c6d6" }}>Total Retailers</span>
+                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: "rgba(77, 142, 255, 0.15)" }}>
+                              <svg className="w-4 h-4" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
+                            </div>
+                          </div>
+                          <div className="flex items-end justify-between">
+                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>847</span>
+                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(77, 142, 255, 0.15)", color: "#adc6ff" }}>+12%</span>
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="rounded-xl p-5 flex flex-col gap-3"
+                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs uppercase tracking-wider" style={{ color: "#c2c6d6" }}>Active Orders</span>
+                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: "rgba(183, 200, 225, 0.15)" }}>
+                              <svg className="w-4 h-4" style={{ color: "#b7c8e1" }} fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
+                            </div>
+                          </div>
+                          <div className="flex items-end justify-between">
+                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>2,341</span>
+                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(183, 200, 225, 0.15)", color: "#b7c8e1" }}>+8%</span>
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="rounded-xl p-5 flex flex-col gap-3"
+                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs uppercase tracking-wider" style={{ color: "#c2c6d6" }}>Outstanding</span>
+                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: "rgba(255, 180, 171, 0.15)" }}>
+                              <svg className="w-4 h-4" style={{ color: "#ffb4ab" }} fill="currentColor" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.15 3 2.15 0 .53-.39 1.39-2.7 1.39-1.78 0-2.63-.85-2.73-2.1h-2.2c.12 1.95 1.3 3.4 3.53 3.83V23h3v-2.15c1.95-.29 3.5-1.5 3.5-3.55 0-2.77-2.49-4.03-4.5-4.41z" /></svg>
+                            </div>
+                          </div>
+                          <div className="flex items-end justify-between">
+                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>₹4.2L</span>
+                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(255, 180, 171, 0.15)", color: "#ffb4ab" }}>-3%</span>
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          className="rounded-xl p-5 flex flex-col gap-3"
+                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs uppercase tracking-wider" style={{ color: "#c2c6d6" }}>Credit Utilization</span>
+                            <div className="p-1.5 rounded-lg" style={{ backgroundColor: "rgba(190, 198, 224, 0.15)" }}>
+                              <svg className="w-4 h-4" style={{ color: "#bec6e0" }} fill="currentColor" viewBox="0 0 24 24"><path d="M23 8h-1.81c-.45 0-.81.37-.81.81h.01c-.01.22-.04.44-.09.66l1.9.01V9zm.01-.5c.01-.44.37-.81.81-.81V9zm-22 .01v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zM2.82 21h18.36l-1.89.01V23H4.71v-.01l-1.89-.01zM7.24 14h1.66v3.01H7.24zm4.24 0h1.66v3.01h-1.66z" /></svg>
+                            </div>
+                          </div>
+                          <div className="flex items-end justify-between">
+                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>67%</span>
+                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(190, 198, 224, 0.15)", color: "#bec6e0" }}>Stable</span>
+                          </div>
+                        </motion.div>
+                      </div>
+
+                      {/* Chart Placeholders Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="rounded-xl p-6 min-h-[280px] flex flex-col"
+                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
+                        >
+                          <div className="flex items-center justify-between mb-6">
+                            <h4 className="text-base font-semibold" style={{ color: "#d8e3fb" }}>Order Volume Trend</h4>
+                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(77, 142, 255, 0.15)", color: "#adc6ff" }}>Last 30 days</span>
+                          </div>
+                          <div className="flex-1 flex items-center justify-center rounded-lg" style={{ backgroundColor: "rgba(21, 32, 49, 0.5)" }}>
+                            <div className="text-center">
+                              <svg className="w-12 h-12 mx-auto mb-3 opacity-40" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z" /></svg>
+                              <p className="text-sm" style={{ color: "#8c909f" }}>Line Chart Placeholder</p>
+                              <p className="text-xs mt-1" style={{ color: "#636b7a" }}>Orders over time visualization</p>
+                            </div>
+                          </div>
+                        </motion.div>
+
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 }}
+                          className="rounded-xl p-6 min-h-[280px] flex flex-col"
+                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
+                        >
+                          <div className="flex items-center justify-between mb-6">
+                            <h4 className="text-base font-semibold" style={{ color: "#d8e3fb" }}>Credit Distribution</h4>
+                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(183, 200, 225, 0.15)", color: "#b7c8e1" }}>By Tier</span>
+                          </div>
+                          <div className="flex-1 flex items-center justify-center rounded-lg" style={{ backgroundColor: "rgba(21, 32, 49, 0.5)" }}>
+                            <div className="text-center">
+                              <svg className="w-12 h-12 mx-auto mb-3 opacity-40" style={{ color: "#b7c8e1" }} fill="currentColor" viewBox="0 0 24 24"><path d="M11 2v20c-5.07-5.08-11-5.08-11-11S5.93 2 11 2zm9.07 4.93l-2.83 2.83c1.26 1.26 1.26 3.3 0 4.56l2.83 2.83c2.07-2.08 2.07-5.45 0-7.53l-2.83-2.83c-1.28 1.28-1.28 3.44 0 4.72zM5.93 16.07C3.85 18.15 3.85 22.5 5.93 24.57l-2.83 2.83c-2.08-2.07-2.08-5.43 0-7.53l2.83-2.83c-1.28 1.28-1.28 3.43 0 4.72z" transform="rotate(45 12 12)" /></svg>
+                              <p className="text-sm" style={{ color: "#8c909f" }}>Donut Chart Placeholder</p>
+                              <p className="text-xs mt-1" style={{ color: "#636b7a" }}>Credit allocation by tier</p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </div>
+                    </div>
+
+                    {/* Right Column (4 cols): Live Telemetry */}
+                    <div className="col-span-12 lg:col-span-4">
+                      <div className="rounded-xl flex flex-col h-full" style={{ backgroundColor: "#152031", border: "1px solid #424754" }}>
+                        <div className="p-4 border-b flex justify-between items-center" style={{ backgroundColor: "#1f2a3c", borderColor: "#424754" }}>
+                          <h3 className="text-lg font-semibold flex items-center gap-2" style={{ color: "#d8e3fb" }}>
+                            <span className="w-2 h-2 rounded-full bg-[#adc6ff] animate-pulse"></span>
+                            Live Telemetry
+                          </h3>
+                          <button>
+                            <svg className="w-5 h-5" style={{ color: "#c2c6d6" }} fill="currentColor" viewBox="0 0 24 24"><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" /></svg>
+                          </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                          {orderFeed.slice(0, 5).map((order, i) => (
+                            <div key={order.id} className="relative pl-6">
+                              <div className="absolute left-0 top-1 w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: "#152031", border: `2px solid ${order.status === "CONFIRMED" ? "#adc6ff" : order.status === "BLOCKED" ? "#ffb4ab" : "#b7c8e1"}` }}>
+                                {order.status === "CONFIRMED" && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#adc6ff" }}></div>}
+                                {order.status === "BLOCKED" && <svg className="w-3 h-3" style={{ color: "#ffb4ab" }} fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 17.59 19 12 12z" /></svg>}
+                              </div>
+                              <div className="rounded-lg p-3" style={{ backgroundColor: "#2a3548", border: "1px solid rgba(66, 71, 84, 0.3)" }}>
+                                <div className="flex justify-between items-start mb-1">
+                                  <span className="text-xs font-mono" style={{ color: "#8c909f" }}>{formatTimeStable(order.createdAt)}</span>
+                                  <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: order.status === "CONFIRMED" ? "rgba(77, 142, 255, 0.1)" : order.status === "BLOCKED" ? "rgba(255, 180, 171, 0.1)" : "rgba(183, 200, 225, 0.1)", color: order.status === "CONFIRMED" ? "#adc6ff" : order.status === "BLOCKED" ? "#ffb4ab" : "#b7c8e1", border: `1px solid ${order.status === "CONFIRMED" ? "rgba(77, 142, 255, 0.2)" : order.status === "BLOCKED" ? "rgba(255, 180, 171, 0.2)" : "rgba(183, 200, 225, 0.2)"}` }}>
+                                    {order.status}
+                                  </span>
+                                </div>
+                                <p className="text-sm font-medium" style={{ color: "#d8e3fb" }}>{order.id}</p>
+                                <p className="text-xs truncate" style={{ color: "#8c909f" }}>{order.retailerName}</p>
+                              </div>
+                            </div>
                           ))}
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+                        </div>
+                        <div className="p-3 border-t text-center" style={{ backgroundColor: "#152031", borderColor: "#424754" }}>
+                          <span className="text-xs font-mono animate-pulse" style={{ color: "#8c909f" }}>Establishing secure handshake...</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </motion.section>
               )}
 
-              {/* ── Panel 2: Trust Map ────────────────────────────── */}
+              {/* ── Panel 2: Trust Map (Split Pane) ────────────────────── */}
               {activePanel === "trust-map" && (
-                <motion.div key="trust" {...fadeUp}>
-                  <Card className="card-lift overflow-hidden relative" style={{ background: "var(--surface-glass)", border: "1px solid var(--border-ghost)", boxShadow: "0 4px 24px rgba(0,0,0,0.15)" }}>
-                    <div className="absolute top-0 right-0 w-[80%] h-[150%] bg-indigo-500/5 blur-3xl rounded-full pointer-events-none" />
-                    <CardContent className="p-4 relative z-10">
-                      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-                        <h2 className="text-xs uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>Retailer Trust Map</h2>
-                        <Tabs value={tierFilter} onValueChange={(v) => setTierFilter(v as "ALL" | RetailerTier)}>
-                          <TabsList style={{ background: "var(--surface-inner)" }}>
-                            {(["ALL", "A", "B", "C", "D"] as const).map((t) => (
-                              <TabsTrigger key={t} value={t} className="data-[state=active]:bg-cyan-500/15 data-[state=active]:text-cyan-600 dark:data-[state=active]:text-cyan-300 transition-all" style={{ color: "var(--text-heading)" }}>
-                                {t === "ALL" ? "All" : `Tier ${t}`}
-                              </TabsTrigger>
-                            ))}
-                          </TabsList>
-                        </Tabs>
+                <motion.div key="trust" {...fadeUp} className="bg-[#0f172a] min-h-screen -mx-4 -my-5 px-4 py-5">
+                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 h-[calc(100vh-140px)]">
+                    {/* Left Pane: Table */}
+                    <div className="bg-slate-800/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden flex flex-col">
+                      {/* Header with Search */}
+                      <div className="p-4 border-b border-white/5">
+                        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                          <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">Retailer Trust Map</h2>
+                          <Tabs value={tierFilter} onValueChange={(v) => setTierFilter(v as "ALL" | RetailerTier)}>
+                            <TabsList className="bg-slate-800/50">
+                              {(["ALL", "A", "B", "C", "D"] as const).map((t) => (
+                                <TabsTrigger key={t} value={t} className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400 text-slate-400 text-xs h-7">
+                                  {t === "ALL" ? "All" : `Tier ${t}`}
+                                </TabsTrigger>
+                              ))}
+                            </TabsList>
+                          </Tabs>
+                        </div>
+                        {/* Search Bar */}
+                        <div className="relative">
+                          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="currentColor" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" /></svg>
+                          <input type="text" placeholder="Search retailers..." className="w-full pl-10 pr-4 py-2 bg-slate-900/50 border border-white/10 rounded-lg text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-blue-500/50" />
+                        </div>
                       </div>
-                      <div className="overflow-x-auto">
-                        <Table className="min-w-[900px] text-sm">
-                          <TableHeader className="bg-zinc-800/50">
-                            <TableRow>
+                      {/* Table */}
+                      <div className="flex-1 overflow-auto">
+                        <Table className="text-sm">
+                          <TableHeader className="bg-slate-800/30 sticky top-0">
+                            <TableRow className="border-b border-white/5">
                               <SortableHead title="Retailer" value="name" onSort={onSort} />
                               <SortableHead title="Trust Score" value="trustScore" onSort={onSort} />
                               <SortableHead title="Tier" value="tier" onSort={onSort} />
@@ -424,68 +595,136 @@ export default function DistributorControlTower() {
                               <SortableHead title="Credit Limit" value="creditLimit" onSort={onSort} />
                               <SortableHead title="Last Payment" value="lastPaymentDate" onSort={onSort} />
                               <SortableHead title="Trend" value="trend" onSort={onSort} />
-                              <TableHead className="px-3 py-2 text-zinc-400 text-xs">Action</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {trustRows.map((r, i) => (
-                              <motion.tr key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                                className="cursor-pointer group hover:-translate-y-1 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300" onClick={() => setSelectedRetailer(r)}
-                                style={{ background: i % 2 === 0 ? "transparent" : "var(--surface-inner)" }}>
-                                <TableCell className="px-3 py-3 font-medium transition-colors group-hover:text-indigo-600 dark:group-hover:text-indigo-400" style={{ color: "var(--text-heading)" }}>{r.name}</TableCell>
-                                <TableCell className="px-3 py-3"><span className={`font-mono font-extrabold bg-clip-text text-transparent ${r.trustScore >= 80 ? "bg-gradient-to-r from-emerald-600 to-emerald-400 dark:from-emerald-400 dark:to-emerald-200" : r.trustScore >= 50 ? "bg-gradient-to-r from-amber-600 to-amber-400 dark:from-amber-400 dark:to-amber-200" : "bg-gradient-to-r from-rose-600 to-rose-400 dark:from-rose-400 dark:to-rose-200"}`}>{r.trustScore}</span></TableCell>
-                                <TableCell className="px-3 py-3"><Badge className={`rounded-lg px-2 py-0.5 text-[10px] ${tierClass(r.tier)}`}>Tier {r.tier}</Badge></TableCell>
-                                <TableCell className="px-3 py-3 font-mono bg-clip-text text-transparent bg-gradient-to-r from-zinc-800 to-zinc-500 dark:from-zinc-200 dark:to-zinc-500">{formatInr(r.outstanding)}</TableCell>
-                                <TableCell className="px-3 py-3 font-mono bg-clip-text text-transparent bg-gradient-to-r from-zinc-800 to-zinc-500 dark:from-zinc-200 dark:to-zinc-500">{formatInr(r.creditLimit)}</TableCell>
-                                <TableCell className="px-3 py-3 font-mono" style={{ color: "var(--text-muted)" }}>{formatDateStable(r.lastPaymentDate)}</TableCell>
-                                <TableCell className="px-3 py-3"><span className={`text-lg ${trendClass(r.trend)}`}>{trendArrow(r.trend)}</span></TableCell>
+                              <TableRow key={r.id} className="border-b border-white/5 hover:bg-slate-700/30 cursor-pointer transition-colors" onClick={() => setSelectedRetailer(r)}>
                                 <TableCell className="px-3 py-3">
-                                  {(r.tier === "A" || r.tier === "B") && (
-                                    <Button size="sm" className="h-7 bg-gradient-to-r from-cyan-600 to-blue-600 text-white text-[10px] px-2 hover:from-cyan-700 hover:to-blue-700"
-                                      onClick={(e) => { e.stopPropagation(); setLastAction(`Trust Certificate requested for ${r.name}`); }}>
-                                      Certificate
-                                    </Button>
-                                  )}
+                                  <p className="font-medium text-slate-200">{r.name}</p>
+                                  {r.hindiName && <p className="text-xs text-slate-500">{r.hindiName}</p>}
                                 </TableCell>
-                              </motion.tr>
+                                <TableCell className="px-3 py-3">
+                                  <span className={`font-mono font-medium ${r.trustScore >= 80 ? "text-emerald-400" : r.trustScore >= 50 ? "text-amber-400" : "text-red-400"}`}>{r.trustScore}</span>
+                                </TableCell>
+                                <TableCell className="px-3 py-3">
+                                  <Badge className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.tier === "A" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : r.tier === "B" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : r.tier === "C" ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
+                                    Tier {r.tier}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="px-3 py-3 font-mono text-slate-300">{formatInr(r.outstanding)}</TableCell>
+                                <TableCell className="px-3 py-3 font-mono text-slate-300">{formatInr(r.creditLimit)}</TableCell>
+                                <TableCell className="px-3 py-3 font-mono text-slate-400">{formatDateStable(r.lastPaymentDate)}</TableCell>
+                                <TableCell className="px-3 py-3"><span className={`text-lg ${trendClass(r.trend)}`}>{trendArrow(r.trend)}</span></TableCell>
+                              </TableRow>
                             ))}
                           </TableBody>
                         </Table>
                       </div>
+                    </div>
 
-                      <Sheet open={Boolean(selectedRetailer)} onOpenChange={(o) => { if (!o) setSelectedRetailer(null); }}>
-                        {selectedRetailer && (
-                          <SheetContent side="right" className="overflow-y-auto w-full sm:max-w-md border-l-0" style={{ background: "var(--surface-header)", backdropFilter: "blur(24px) saturate(1.4)", WebkitBackdropFilter: "blur(24px) saturate(1.4)" }}>
-                            <SheetHeader>
-                              <SheetTitle style={{ color: "var(--text-heading)" }}>{selectedRetailer.name}</SheetTitle>
-                              <SheetDescription style={{ color: "var(--text-muted)" }}>
-                                Trust Score <span className={`font-mono font-extrabold bg-clip-text text-transparent ${selectedRetailer.trustScore >= 80 ? "bg-gradient-to-r from-emerald-600 to-emerald-400 dark:from-emerald-400 dark:to-emerald-200" : selectedRetailer.trustScore >= 50 ? "bg-gradient-to-r from-amber-600 to-amber-400 dark:from-amber-400 dark:to-amber-200" : "bg-gradient-to-r from-rose-600 to-rose-400 dark:from-rose-400 dark:to-rose-200"}`}>{selectedRetailer.trustScore}</span> · Tier {selectedRetailer.tier}
-                              </SheetDescription>
-                            </SheetHeader>
-                            <div className="mt-6 space-y-4">
-                              <p className="text-xs uppercase tracking-widest" style={{ color: "var(--text-dim)" }}>Score Breakdown</p>
-                              {factorData(selectedRetailer).map((f, i) => (
-                                <motion.div key={f.label} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
-                                  <div className="mb-1.5 flex items-center justify-between text-sm">
-                                    <p style={{ color: "var(--text-body)" }}>{f.label}</p>
-                                    <p className={`font-mono font-bold ${scoreColor(f.value)}`}>{f.value}</p>
-                                  </div>
-                                  <div className="h-3 rounded-full" style={{ background: "var(--surface-inner)" }}>
-                                    <motion.div className={`h-3 rounded-full ${scoreBarColor(f.value)} shadow-[0_0_10px_currentColor]`} initial={{ width: 0 }} animate={{ width: `${Math.max(5, f.value)}%` }} transition={{ duration: 0.8, delay: i * 0.08, ease: "easeOut" }} />
-                                  </div>
-                                </motion.div>
-                              ))}
-                            </div>
-                            <div className="mt-6 pt-4 space-y-2 text-sm" style={{ borderTop: "1px solid var(--border-ghost-subtle)", color: "var(--text-muted)" }}>
-                              <p>Outstanding: <span className="font-mono font-semibold" style={{ color: "var(--text-heading)" }}>{formatInr(selectedRetailer.outstanding)}</span></p>
-                              <p>Credit Limit: <span className="font-mono font-semibold" style={{ color: "var(--text-heading)" }}>{formatInr(selectedRetailer.creditLimit)}</span></p>
-                              <p>Last Payment: <span className="font-mono font-semibold" style={{ color: "var(--text-heading)" }}>{formatDateStable(selectedRetailer.lastPaymentDate)}</span></p>
-                            </div>
-                          </SheetContent>
+                    {/* Right Pane: Score Breakdown Sidebar */}
+                    <div className="bg-slate-800/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden flex flex-col">
+                      <div className="p-4 border-b border-white/5">
+                        <h3 className="text-sm font-semibold text-slate-200">Score Breakdown</h3>
+                        {selectedRetailer ? (
+                          <p className="text-xs text-slate-400 mt-1">{selectedRetailer.name}</p>
+                        ) : (
+                          <p className="text-xs text-slate-500 mt-1">Select a retailer from the list</p>
                         )}
-                      </Sheet>
-                    </CardContent>
-                  </Card>
+                      </div>
+                      <div className="flex-1 overflow-auto p-4">
+                        {selectedRetailer ? (
+                          <>
+                            {/* Summary Stats */}
+                            <div className="grid grid-cols-2 gap-2">
+                              <div className="bg-slate-900/50 rounded-lg p-3">
+                                <p className="text-[10px] uppercase text-slate-500 mb-1">Outstanding</p>
+                                <p className="text-sm font-mono font-medium text-slate-200">{formatInr(selectedRetailer.outstanding)}</p>
+                              </div>
+                              <div className="bg-slate-900/50 rounded-lg p-3">
+                                <p className="text-[10px] uppercase text-slate-500 mb-1">Credit Limit</p>
+                                <p className="text-sm font-mono font-medium text-slate-200">{formatInr(selectedRetailer.creditLimit)}</p>
+                              </div>
+                            </div>
+
+                             {/* --- SCORE BREAKDOWN SECTION --- */}
+                             <div className="mt-8 px-4">
+                               <h3 className="text-xs font-semibold text-slate-500 tracking-wider mb-4 uppercase">Score Breakdown</h3>
+                               <div className="space-y-4">
+                                 {[
+                                   { label: "Payment History", val: "95/100", p: "95%", c: "bg-blue-500", tc: "text-blue-400" },
+                                   { label: "Credit Utilization", val: "65/100", p: "65%", c: "bg-orange-500", tc: "text-orange-400" },
+                                   { label: "Order Frequency", val: "88/100", p: "88%", c: "bg-blue-500", tc: "text-blue-400" },
+                                   { label: "Return Rate", val: "92/100", p: "92%", c: "bg-emerald-500", tc: "text-emerald-400" },
+                                   { label: "Scheme Compliance", val: "78/100", p: "78%", c: "bg-blue-500", tc: "text-blue-400" },
+                                   { label: "Market Tenure", val: "85/100", p: "85%", c: "bg-blue-500", tc: "text-blue-400" }
+                                 ].map((m, i) => (
+                                   <div key={i}>
+                                     <div className="flex justify-between text-sm mb-1">
+                                       <span className="text-slate-300">{m.label}</span>
+                                        <span className={m.tc + " font-medium"}>{m.val}</span>
+                                     </div>
+                                     <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                        <div className={"h-full " + m.c + " rounded-full"} style={{ width: m.p }}></div>
+                                     </div>
+                                   </div>
+                                 ))}
+                               </div>
+                             </div>
+
+                             {/* --- BOTTOM ACTION BUTTONS --- */}
+                             <div className="mt-8 pt-6 px-4 border-t border-white/5 space-y-3 pb-6">
+                               <button className="w-full bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30 rounded-lg py-3 flex items-center justify-center font-medium transition-all">
+                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                 Issue Trust Certificate
+                               </button>
+                               <button className="w-full bg-transparent text-slate-300 border border-slate-600 hover:bg-slate-800 rounded-lg py-3 font-medium transition-all">
+                                 View Full Profile
+                               </button>
+                             </div>
+                          </>
+                        ) : (
+                          <div className="flex items-center justify-center h-full text-center">
+                            <p className="text-sm text-slate-500">Click a retailer to view details</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Detail Sheet (for mobile/small screens) */}
+                  <Sheet open={Boolean(selectedRetailer)} onOpenChange={(o) => { if (!o) setSelectedRetailer(null); }}>
+                    {selectedRetailer && (
+                      <SheetContent side="right" className="overflow-y-auto w-full sm:max-w-md border-l border-white/10 bg-[#0f172a]/95 backdrop-blur-xl">
+                        <SheetHeader>
+                          <SheetTitle className="text-slate-200">{selectedRetailer.name}</SheetTitle>
+                          <SheetDescription className="text-slate-400">
+                            Trust Score <span className={`font-mono font-bold ${selectedRetailer.trustScore >= 80 ? "text-emerald-500" : selectedRetailer.trustScore >= 50 ? "text-amber-500" : "text-red-500"}`}>{selectedRetailer.trustScore}</span> · Tier {selectedRetailer.tier}
+                          </SheetDescription>
+                        </SheetHeader>
+                        <div className="mt-6 space-y-4">
+                          <p className="text-xs uppercase tracking-widest text-slate-500">Score Breakdown</p>
+                          {factorData(selectedRetailer).map((f, i) => (
+                            <motion.div key={f.label} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
+                              <div className="mb-1.5 flex items-center justify-between text-sm">
+                                <p className="text-slate-300">{f.label}</p>
+                                <p className={`font-mono font-bold ${scoreColor(f.value)}`}>{f.value}</p>
+                              </div>
+                              <div className="h-2 rounded-full bg-slate-700/50">
+                                <motion.div className={`h-2 rounded-full ${scoreBarColor(f.value)}`} initial={{ width: 0 }} animate={{ width: `${Math.max(5, f.value)}%` }} transition={{ duration: 0.8, delay: i * 0.08, ease: "easeOut" }} />
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                        <div className="mt-6 pt-4 space-y-2 text-sm border-t border-white/10 text-slate-400">
+                          <p>Outstanding: <span className="font-mono font-semibold text-slate-200">{formatInr(selectedRetailer.outstanding)}</span></p>
+                          <p>Credit Limit: <span className="font-mono font-semibold text-slate-200">{formatInr(selectedRetailer.creditLimit)}</span></p>
+                          <p>Last Payment: <span className="font-mono font-semibold text-slate-200">{formatDateStable(selectedRetailer.lastPaymentDate)}</span></p>
+                        </div>
+                      </SheetContent>
+                    )}
+                  </Sheet>
                 </motion.div>
               )}
 
@@ -505,8 +744,8 @@ export default function DistributorControlTower() {
 
 function SortableHead({ title, value, onSort }: { title: string; value: SortKey; onSort: (v: SortKey) => void }) {
   return (
-    <TableHead className="px-3 py-2 text-zinc-400 text-xs">
-      <button onClick={() => onSort(value)} className="inline-flex items-center gap-1 hover:text-zinc-200 transition">
+    <TableHead className="px-3 py-3 text-slate-400 text-xs uppercase tracking-wider">
+      <button onClick={() => onSort(value)} className="inline-flex items-center gap-1 hover:text-slate-200 transition">
         {title} <span className="text-[10px] opacity-50">↕</span>
       </button>
     </TableHead>
