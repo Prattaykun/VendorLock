@@ -85,7 +85,7 @@ python run.py
 # OR
 uvicorn main:app --reload --port 8000
 ```
-
+.
 API Docs: http://localhost:8000/docs  
 ReDoc: http://localhost:8000/redoc
 
