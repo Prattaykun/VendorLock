@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { salesmen, ghostVisitAlerts, beatPlan as mockBeatPlan } from "@/lib/mock-data";
+import { salesmen, coverageZones, ghostVisitAlerts, beatPlan as mockBeatPlan } from "@/lib/mock-data";
 import { formatInr } from "@/lib/helpers";
 import "leaflet/dist/leaflet.css";
 
@@ -30,17 +30,34 @@ const Tooltip = dynamic(
   { ssr: false }
 );
 
-const beatTerritories = [
-  { name: "Rajeev (Linking Rd)", status: "critical", color: "#ef4444", center: [19.0620, 72.8330] as [number, number] },
-  { name: "Amit (SV Rd)", status: "optimal", color: "#10b981", center: [19.0600, 72.8380] as [number, number] },
-  { name: "Vikram (Carter Rd)", status: "at-risk", color: "#f97316", center: [19.0560, 72.8310] as [number, number] },
+const coverageZoneCoordinates: Record<string, [number, number]> = {
+  "Dadar West": [19.018, 72.842],
+  "Vile Parle East": [19.097, 72.855],
+  "Kurla West": [19.071, 72.878],
+  "Bhandup East": [19.141, 72.954],
+  "Thane Station": [19.189, 72.975],
+  "Malad West": [19.186, 72.828],
+  Dharavi: [19.045, 72.858],
+  "Kalyan East": [19.244, 73.131],
+};
+
+const salesmanCoverageProfile = {
+  "Rahul Yadav": ["Dadar West", "Kurla West", "Dharavi"],
+  "Amit Sharma": ["Vile Parle East", "Malad West", "Dadar West"],
+  "Vikram Patil": ["Bhandup East", "Thane Station", "Kalyan East"],
+} as const;
+
+const coverageLegend = [
+  { label: "High coverage", color: "#22c55e" },
+  { label: "Balanced coverage", color: "#f59e0b" },
+  { label: "Low coverage", color: "#ef4444" },
 ];
 
-const statusColors: Record<string, string> = {
-  optimal: "#10b981",
-  "at-risk": "#f97316",
-  critical: "#ef4444",
-};
+const coverageIntensityByStatus = {
+  VISITED_ORDERS: { color: "#22c55e", halo: "#16a34a", opacity: 0.42, radius: 1 },
+  VISITED_NO_ORDERS: { color: "#f59e0b", halo: "#ea580c", opacity: 0.34, radius: 0.78 },
+  NOT_VISITED: { color: "#ef4444", halo: "#dc2626", opacity: 0.28, radius: 0.62 },
+} as const;
 
 const fadeUp = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
 
@@ -79,8 +96,8 @@ const MapPlaceholder = () => {
 
   return (
     <MapContainer
-      center={[19.0620, 72.8350]}
-      zoom={14}
+      center={[19.0750, 72.8850]}
+      zoom={12}
       style={{ height: "100%", width: "100%", minHeight: "340px" }}
       zoomControl={true}
       attributionControl={true}
@@ -89,34 +106,58 @@ const MapPlaceholder = () => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      {beatTerritories.map((beat) => (
-        <Fragment key={beat.name}>
-          <Circle
-            center={beat.center}
-            radius={350}
-            pathOptions={{
-              color: beat.color,
-              fillColor: beat.color,
-              fillOpacity: 0.2,
-              weight: 1,
-            }}
-          >
-            <Tooltip sticky>
-              <span className="font-medium text-sm">{beat.name}</span>
-            </Tooltip>
-          </Circle>
-          <CircleMarker
-            center={beat.center}
-            radius={6}
-            pathOptions={{
-              color: "#ffffff",
-              weight: 2,
-              fillColor: beat.color,
-              fillOpacity: 1,
-            }}
-          />
-        </Fragment>
-      ))}
+      {coverageZones.map((zone) => {
+        const center = coverageZoneCoordinates[zone.sector];
+
+        if (!center) {
+          return null;
+        }
+
+        const intensity = coverageIntensityByStatus[zone.status];
+        const zoneRadius = 1100 + zone.outlets * 60;
+        const haloRadius = zoneRadius * intensity.radius;
+
+        return (
+          <Fragment key={zone.id}>
+            <Circle
+              center={center}
+              radius={haloRadius}
+              pathOptions={{
+                color: intensity.halo,
+                fillColor: intensity.halo,
+                fillOpacity: 0.18,
+                weight: 0,
+              }}
+            />
+            <Circle
+              center={center}
+              radius={zoneRadius}
+              pathOptions={{
+                color: intensity.color,
+                fillColor: intensity.color,
+                fillOpacity: intensity.opacity,
+                weight: 0,
+              }}
+            >
+              <Tooltip sticky>
+                <span className="font-medium text-sm">
+                  {zone.sector} · {zone.status.replaceAll("_", " ")}
+                </span>
+              </Tooltip>
+            </Circle>
+            <CircleMarker
+              center={center}
+              radius={7 + zone.outlets / 3}
+              pathOptions={{
+                color: "#ffffff",
+                weight: 2,
+                fillColor: intensity.color,
+                fillOpacity: 1,
+              }}
+            />
+          </Fragment>
+        );
+      })}
     </MapContainer>
   );
 };
@@ -181,21 +222,15 @@ export default function BeatIntelligencePanel() {
                   <svg className="w-4 h-4" style={{ color: COLORS.primary }} fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                   </svg>
-                  Coverage Heatmap
+                  Salesman Coverage Heatmap
                 </CardTitle>
                 <div className="flex gap-4 text-[10px]" style={{ color: COLORS.onSurfaceVariant }}>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: statusColors.optimal, boxShadow: `0 0 6px ${statusColors.optimal}` }} />
-                    Optimal
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: statusColors["at-risk"], boxShadow: `0 0 6px ${statusColors["at-risk"]}` }} />
-                    At Risk
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: statusColors.critical, boxShadow: `0 0 6px ${statusColors.critical}` }} />
-                    Critical
-                  </span>
+                  {coverageLegend.map((item) => (
+                    <span key={item.label} className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color, boxShadow: `0 0 6px ${item.color}` }} />
+                      {item.label}
+                    </span>
+                  ))}
                 </div>
               </div>
 

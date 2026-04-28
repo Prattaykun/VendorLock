@@ -1,7 +1,15 @@
 import type { Alert, OrderStatus, RetailerTier, RetailerTrend, CreditVerdict, ExpiryRisk, ReturnVerdict, CoverageStatus, AuditEventType } from "@/types/dashboard";
 
 export function formatInr(value: number) {
-  return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(value);
+  // Use Indian locale and rupee currency symbol. Show decimals only when value has fractional part.
+  const hasFraction = Math.round(value) !== value;
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    currencyDisplay: "symbol",
+    minimumFractionDigits: hasFraction ? 2 : 0,
+    maximumFractionDigits: hasFraction ? 2 : 0,
+  }).format(value);
 }
 
 export function formatTimeStable(isoTime: string) {

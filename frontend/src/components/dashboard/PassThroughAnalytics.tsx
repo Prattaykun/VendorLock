@@ -113,6 +113,25 @@ export default function PassThroughAnalytics() {
     (left, right) => left.leakage_percentage - right.leakage_percentage,
   )[0];
 
+  const maxCostBasis = Math.max(...metrics.monthly_trends.map((trend) => trend.cost_basis), 1);
+  const trendChartWidth = 720;
+  const trendChartHeight = 280;
+  const trendBaselineY = 230;
+  const costScaleHeight = 170;
+  const passThroughScaleHeight = 170;
+  const trendPoints = metrics.monthly_trends.map((trend, index) => {
+    const x = 90 + index * 210;
+    const costHeight = (trend.cost_basis / maxCostBasis) * costScaleHeight;
+    const passThroughY = trendBaselineY - (trend.pass_through / 100) * passThroughScaleHeight;
+
+    return {
+      ...trend,
+      x,
+      costHeight,
+      passThroughY,
+    };
+  });
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "OPTIMAL":
@@ -393,37 +412,91 @@ export default function PassThroughAnalytics() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="h-64 flex items-end justify-between gap-4 px-2">
-                  {metrics.monthly_trends.map((trend) => (
-                    <div key={trend.month} className="flex-1 flex flex-col items-center gap-2 group">
-                      <div className="w-full flex items-end gap-1 h-full relative">
-                        <div
-                          className="flex-1 bg-slate-800 rounded-t-sm transition-all group-hover:bg-slate-700"
-                          style={{ height: `${trend.cost_basis}%` }}
+                <div className="rounded-xl border border-slate-800/70 bg-slate-950/50 p-4 overflow-hidden">
+                  <svg viewBox={`0 0 ${trendChartWidth} ${trendChartHeight}`} className="w-full h-72 overflow-visible">
+                    <defs>
+                      <linearGradient id="trendCostGradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#475569" stopOpacity="0.95" />
+                        <stop offset="100%" stopColor="#1f2937" stopOpacity="0.6" />
+                      </linearGradient>
+                      <linearGradient id="trendPassGradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#60a5fa" stopOpacity="1" />
+                        <stop offset="100%" stopColor="#2563eb" stopOpacity="0.75" />
+                      </linearGradient>
+                    </defs>
+
+                    {[0, 1, 2, 3].map((tick) => {
+                      const y = 40 + tick * 55;
+                      return (
+                        <g key={tick}>
+                          <line x1="40" y1={y} x2="680" y2={y} stroke="#334155" strokeDasharray="4 8" strokeOpacity="0.7" />
+                          <text x="10" y={y + 4} fill="#64748b" fontSize="10" fontWeight="700">
+                            {100 - tick * 25}%
+                          </text>
+                        </g>
+                      );
+                    })}
+
+                    <line x1="40" y1={trendBaselineY} x2="680" y2={trendBaselineY} stroke="#475569" strokeWidth="1.25" />
+
+                    {trendPoints.map((trend) => (
+                      <g key={trend.month}>
+                        <rect
+                          x={trend.x - 64}
+                          y={trendBaselineY - trend.costHeight}
+                          width="44"
+                          height={trend.costHeight}
+                          rx="10"
+                          fill="url(#trendCostGradient)"
                         />
-                        <div
-                          className={`flex-1 rounded-t-sm transition-all ${
-                            trend.is_current
-                              ? "bg-blue-500 border-t border-white/20"
-                              : "bg-blue-500/40 group-hover:bg-blue-500/60"
-                          }`}
-                          style={{ height: `${trend.pass_through}%` }}
+                        <rect
+                          x={trend.x - 10}
+                          y={trendBaselineY - (trend.pass_through / 100) * 170}
+                          width="44"
+                          height={(trend.pass_through / 100) * 170}
+                          rx="10"
+                          fill={trend.is_current ? "url(#trendPassGradient)" : "rgba(96, 165, 250, 0.45)"}
+                          stroke={trend.is_current ? "#93c5fd" : "transparent"}
                         />
                         {trend.is_current && (
-                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded">
-                            CUR
-                          </div>
+                          <g>
+                            <circle cx={trend.x + 12} cy={trend.passThroughY} r="6" fill="#60a5fa" stroke="#dbeafe" strokeWidth="2" />
+                            <text
+                              x={trend.x + 12}
+                              y={trend.passThroughY - 14}
+                              textAnchor="middle"
+                              fill="#bfdbfe"
+                              fontSize="10"
+                              fontWeight="700"
+                            >
+                              CUR
+                            </text>
+                          </g>
                         )}
-                      </div>
-                      <span
-                        className={`text-[10px] font-bold ${
-                          trend.is_current ? "text-blue-400" : "text-slate-500"
-                        }`}
-                      >
-                        {trend.month}
-                      </span>
-                    </div>
-                  ))}
+                        {!trend.is_current && (
+                          <circle cx={trend.x + 12} cy={trend.passThroughY} r="4" fill="#93c5fd" />
+                        )}
+                        <text x={trend.x - 42} y="260" fill={trend.is_current ? "#93c5fd" : "#64748b"} fontSize="10" fontWeight="700">
+                          {trend.month}
+                        </text>
+                        <text x={trend.x - 42} y={trendBaselineY - trend.costHeight - 8} fill="#94a3b8" fontSize="10" fontWeight="700">
+                          ₹{(trend.cost_basis / 100000).toFixed(1)}L
+                        </text>
+                        <text x={trend.x + 34} y={trendBaselineY - (trend.pass_through / 100) * 170 - 8} fill="#bfdbfe" fontSize="10" fontWeight="700">
+                          {trend.pass_through}%
+                        </text>
+                      </g>
+                    ))}
+
+                    <polyline
+                      points={trendPoints.map((trend) => `${trend.x + 12},${trend.passThroughY}`).join(" ")}
+                      fill="none"
+                      stroke="#60a5fa"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </div>
               </CardContent>
             </Card>
