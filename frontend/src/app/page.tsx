@@ -11,97 +11,97 @@ import {
 
 export default function RootLandingPage() {
   return (
-    <main className="relative min-h-screen bg-slate-950 flex flex-col items-center justify-center p-8 md:p-12 overflow-hidden">
+    <main className="relative min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 md:p-16 overflow-hidden">
       <div 
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none mix-blend-luminosity" 
         style={{ backgroundImage: "url('/distributor-bg.jpeg')" }} 
       />
       <div className="fixed inset-0 z-0 bg-black/70 pointer-events-none" />
-      <div className="relative z-10 max-w-5xl w-full space-y-12 text-center">
-        <div className="space-y-4 pb-8">
-          <h1 className="text-6xl font-bold tracking-tighter bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+      <div className="relative z-10 max-w-6xl w-full space-y-16 text-center">
+        <div className="space-y-6 pb-12">
+          <h1 className="text-7xl md:text-8xl font-black tracking-tighter bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
             VendorLock AI
           </h1>
-          <p className="text-zinc-400 text-lg">
+          <p className="text-zinc-300 text-xl md:text-2xl">
             Trade Intelligence & Risk Management Platform
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           <Link href="/distributor">
             <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500 transition-all cursor-pointer group h-full">
-              <CardHeader className="pb-6">
-                <div className="mb-6 text-blue-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <LayoutDashboard size={56} />
+              <CardHeader className="pb-8 pt-8">
+                <div className="mb-8 text-blue-500 group-hover:scale-110 transition-transform flex justify-center">
+                  <LayoutDashboard size={64} />
                 </div>
-                <CardTitle className="text-white text-lg">Distributor</CardTitle>
-                <CardDescription className="text-zinc-400 text-sm mt-2">Control Tower & Beat Intelligence</CardDescription>
+                <CardTitle className="text-white text-xl md:text-2xl">Distributor</CardTitle>
+                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3">Control Tower & Beat Intelligence</CardDescription>
               </CardHeader>
             </Card>
           </Link>
 
           <Link href="/company">
             <Card className="bg-zinc-900 border-zinc-800 hover:border-purple-500 transition-all cursor-pointer group h-full">
-              <CardHeader className="pb-6">
-                <div className="mb-6 text-purple-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Building2 size={56} />
+              <CardHeader className="pb-8 pt-8">
+                <div className="mb-8 text-purple-500 group-hover:scale-110 transition-transform flex justify-center">
+                  <Building2 size={64} />
                 </div>
-                <CardTitle className="text-white text-lg">Company</CardTitle>
-                <CardDescription className="text-zinc-400 text-sm mt-2">Policy Management & Oversight</CardDescription>
+                <CardTitle className="text-white text-xl md:text-2xl">Company</CardTitle>
+                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3">Policy Management & Oversight</CardDescription>
               </CardHeader>
             </Card>
           </Link>
 
           <Link href="/agent">
             <Card className="bg-zinc-900 border-zinc-800 hover:border-green-500 transition-all cursor-pointer group h-full">
-              <CardHeader className="pb-6">
-                <div className="mb-6 text-green-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Users size={56} />
+              <CardHeader className="pb-8 pt-8">
+                <div className="mb-8 text-green-500 group-hover:scale-110 transition-transform flex justify-center">
+                  <Users size={64} />
                 </div>
-                <CardTitle className="text-white text-lg">Salesman</CardTitle>
-                <CardDescription className="text-zinc-400 text-sm mt-2">On-field Intelligence & Execution</CardDescription>
+                <CardTitle className="text-white text-xl md:text-2xl">Salesman</CardTitle>
+                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3">On-field Intelligence & Execution</CardDescription>
               </CardHeader>
             </Card>
           </Link>
 
           <Link href="/nbfc">
             <Card className="bg-zinc-900 border-zinc-800 hover:border-amber-500 transition-all cursor-pointer group h-full">
-              <CardHeader className="pb-6">
-                <div className="mb-6 text-amber-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Landmark size={56} />
+              <CardHeader className="pb-8 pt-8">
+                <div className="mb-8 text-amber-500 group-hover:scale-110 transition-transform flex justify-center">
+                  <Landmark size={64} />
                 </div>
-                <CardTitle className="text-white text-lg">NBFC / Lender</CardTitle>
-                <CardDescription className="text-zinc-400 text-sm mt-2">Credit Risk, Collections & Portfolio View</CardDescription>
+                <CardTitle className="text-white text-xl md:text-2xl">NBFC / Lender</CardTitle>
+                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3">Credit Risk, Collections & Portfolio View</CardDescription>
               </CardHeader>
             </Card>
           </Link>
 
           <Link href="/horeca">
             <Card className="bg-zinc-900 border-zinc-800 hover:border-orange-500 transition-all cursor-pointer group h-full">
-              <CardHeader className="pb-6">
-                <div className="mb-6 text-orange-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <UtensilsCrossed size={56} />
+              <CardHeader className="pb-8 pt-8">
+                <div className="mb-8 text-orange-500 group-hover:scale-110 transition-transform flex justify-center">
+                  <UtensilsCrossed size={64} />
                 </div>
-                <CardTitle className="text-white text-lg">HORECA Buyer</CardTitle>
-                <CardDescription className="text-zinc-400 text-sm mt-2">Purchase Planning, Fill Rate & Supplier Insights</CardDescription>
+                <CardTitle className="text-white text-xl md:text-2xl">HORECA Buyer</CardTitle>
+                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3">Purchase Planning, Fill Rate & Supplier Insights</CardDescription>
               </CardHeader>
             </Card>
           </Link>
 
           <Link href="/retailer">
             <Card className="bg-zinc-900 border-zinc-800 hover:border-cyan-500 transition-all cursor-pointer group h-full">
-              <CardHeader className="pb-6">
-                <div className="mb-6 text-cyan-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Store size={56} />
+              <CardHeader className="pb-8 pt-8">
+                <div className="mb-8 text-cyan-500 group-hover:scale-110 transition-transform flex justify-center">
+                  <Store size={64} />
                 </div>
-                <CardTitle className="text-white text-lg">Retailer Dashboard</CardTitle>
-                <CardDescription className="text-zinc-400 text-sm mt-2">Kirana Operations, Inventory Health & Reorder Signals</CardDescription>
+                <CardTitle className="text-white text-xl md:text-2xl">Retailer Dashboard</CardTitle>
+                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3">Kirana Operations, Inventory Health & Reorder Signals</CardDescription>
               </CardHeader>
             </Card>
           </Link>
         </div>
 
-        <div className="pt-16 text-zinc-600 text-xs tracking-wide">
+        <div className="pt-20 text-zinc-600 text-xs tracking-wide">
           &copy; 2026 VendorLock AI. All rights reserved.
         </div>
       </div>
