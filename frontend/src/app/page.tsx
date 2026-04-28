@@ -1,6 +1,13 @@
 import Link from 'next/link';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Building2, Users, LayoutDashboard } from "lucide-react";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Building2,
+  Users,
+  LayoutDashboard,
+  Landmark,
+  UtensilsCrossed,
+  Store,
+} from "lucide-react";
 
 export default function RootLandingPage() {
   return (
@@ -20,7 +27,7 @@ export default function RootLandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
           <Link href="/distributor">
             <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500 transition-all cursor-pointer group h-full">
               <CardHeader>
@@ -53,6 +60,42 @@ export default function RootLandingPage() {
                 </div>
                 <CardTitle className="text-white">Salesman</CardTitle>
                 <CardDescription>On-field Intelligence & Execution</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/nbfc">
+            <Card className="bg-zinc-900 border-zinc-800 hover:border-amber-500 transition-all cursor-pointer group h-full">
+              <CardHeader>
+                <div className="mb-4 text-amber-500 group-hover:scale-110 transition-transform">
+                  <Landmark size={48} />
+                </div>
+                <CardTitle className="text-white">NBFC / Lender</CardTitle>
+                <CardDescription>Credit Risk, Collections & Portfolio View</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/horeca">
+            <Card className="bg-zinc-900 border-zinc-800 hover:border-orange-500 transition-all cursor-pointer group h-full">
+              <CardHeader>
+                <div className="mb-4 text-orange-500 group-hover:scale-110 transition-transform">
+                  <UtensilsCrossed size={48} />
+                </div>
+                <CardTitle className="text-white">HORECA Buyer</CardTitle>
+                <CardDescription>Purchase Planning, Fill Rate & Supplier Insights</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/retailer">
+            <Card className="bg-zinc-900 border-zinc-800 hover:border-cyan-500 transition-all cursor-pointer group h-full">
+              <CardHeader>
+                <div className="mb-4 text-cyan-500 group-hover:scale-110 transition-transform">
+                  <Store size={48} />
+                </div>
+                <CardTitle className="text-white">Retailer Dashboard</CardTitle>
+                <CardDescription>Kirana Operations, Inventory Health & Reorder Signals</CardDescription>
               </CardHeader>
             </Card>
           </Link>
