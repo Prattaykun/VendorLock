@@ -317,7 +317,7 @@ export default function BeatIntelligencePanel() {
                 </TableHeader>
                 <TableBody>
                   {displayBeatPlan.map((bp, i) => {
-                    const hasRisk = bp.riskFlags.length > 0;
+                    const hasRisk = bp.riskFlags && bp.riskFlags.length > 0;
                     return (
                       <TableRow
                         key={i}
@@ -327,11 +327,11 @@ export default function BeatIntelligencePanel() {
                           borderColor: `${COLORS.outlineVariant}80`,
                         }}
                       >
-                        <TableCell className="px-3 py-3 font-medium" style={{ color: COLORS.onSurface }}>{bp.outletName}</TableCell>
-                        <TableCell className="px-3 py-3" style={{ color: hasRisk ? COLORS.error : COLORS.onSurfaceVariant }}>{bp.salesmanName}</TableCell>
+                        <TableCell className="px-3 py-3 font-medium" style={{ color: COLORS.onSurface }}>{bp.outletName || bp.outlet_id}</TableCell>
+                        <TableCell className="px-3 py-3" style={{ color: hasRisk ? COLORS.error : COLORS.onSurfaceVariant }}>{bp.salesmanName || bp.salesman_id}</TableCell>
                         <TableCell className="px-3 py-3">
                           <div className="flex gap-1 flex-wrap">
-                            {bp.prioritySKUs.map((sku, si) => (
+                            {(bp.prioritySKUs || []).map((sku: string, si: number) => (
                               <span
                                 key={si}
                                 className="px-2 py-0.5 rounded text-[10px]"
@@ -349,7 +349,7 @@ export default function BeatIntelligencePanel() {
                         <TableCell className="px-3 py-3 text-right">
                           {hasRisk ? (
                             <div className="flex justify-end gap-1 flex-wrap">
-                              {bp.riskFlags.map((flag, fi) => (
+                              {bp.riskFlags.map((flag: string, fi: number) => (
                                 <span
                                   key={fi}
                                   className="px-2 py-1 rounded text-[10px]"

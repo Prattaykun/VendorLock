@@ -159,17 +159,19 @@ export default function DistributorControlTower() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
-      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[264px_1fr]">
+    <div className="min-h-screen text-[var(--foreground)] bg-transparent">
+      <div className="grid min-h-screen grid-cols-1 lg:grid-cols-[264px_1fr] bg-transparent">
         {/* ── Sidebar ──────────────────────────────────────────────── */}
-        <aside className="hidden lg:flex flex-col sticky top-0 h-screen" style={{ background: "var(--surface-sidebar)", borderRight: "1px solid var(--border-ghost-subtle)" }}>
+        <aside className="hidden lg:flex flex-col sticky top-0 h-screen bg-slate-900/60 backdrop-blur-md" style={{ borderRight: "1px solid var(--border-ghost-subtle)" }}>
           {/* Brand */}
           <div className="px-5 pt-6 pb-5" style={{ borderBottom: "1px solid var(--border-ghost-subtle)" }}>
             <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center text-base font-black text-white shadow-lg" style={{ boxShadow: "var(--brand-glow)" }}>V</div>
-              <div>
-                <p className="text-[17px] font-extrabold tracking-tight text-gradient-brand leading-tight">VendorLock</p>
-                <p className="text-[9px] uppercase tracking-[0.25em] text-zinc-600 font-medium mt-0.5">Distributor OS</p>
+              <div className="h-14 w-14 shrink-0 rounded-full overflow-hidden flex items-center justify-center shadow-lg bg-slate-900 border border-white/10" style={{ boxShadow: "var(--brand-glow)" }}>
+                <img src="/logo-round.png" alt="VendorLock Logo" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex flex-col justify-center translate-y-1">
+                <img src="/logo-text.png" alt="VendorLock" className="h-20 w-auto object-contain object-left -ml-2" />
+                <p className="text-[10px] uppercase tracking-[0.2em] text-zinc-400 font-bold leading-none -mt-3 ml-0.5">Distributor OS</p>
               </div>
             </div>
             {/* User Profile Card */}
@@ -218,7 +220,12 @@ export default function DistributorControlTower() {
         {/* Mobile nav bar */}
         <div className="lg:hidden sticky top-0 z-30 px-3 py-2" style={{ background: "var(--mobile-nav-bg)", backdropFilter: "blur(24px)", borderBottom: "1px solid var(--border-ghost-subtle)" }}>
           <div className="flex items-center justify-between mb-2">
-            <p className="text-lg font-extrabold text-gradient-brand">VendorLock</p>
+            <div className="flex items-center gap-2">
+              <div className="h-10 w-10 shrink-0 rounded-full overflow-hidden flex items-center justify-center shadow-lg bg-slate-900 border border-white/10">
+                <img src="/logo-round.png" alt="VendorLock Logo" className="w-full h-full object-cover" />
+              </div>
+              <img src="/logo-text.png" alt="VendorLock" className="h-14 w-auto object-contain object-left -ml-1 translate-y-1" />
+            </div>
             <Button variant="ghost" className="text-zinc-400 h-9 w-9 p-0" onClick={() => setMobileNav(!mobileNav)}>
               {mobileNav ? <X size={18} /> : <Menu size={18} />}
             </Button>
@@ -248,7 +255,7 @@ export default function DistributorControlTower() {
             initial: { opacity: 0, y: 20 },
             animate: { opacity: 1, y: 0, transition: { duration: 0.5, staggerChildren: 0.1 } }
           }}
-          className="flex min-h-screen flex-col bg-black text-white"
+          className="flex min-h-screen flex-col bg-transparent text-white"
         >
           <motion.header variants={fadeUp} className="sticky top-0 z-20" style={{ background: "rgba(0,0,0,0.85)", backdropFilter: "blur(24px) saturate(1.4)", WebkitBackdropFilter: "blur(24px) saturate(1.4)", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
             <div className="flex flex-col gap-4 px-5 py-5 sm:px-8">

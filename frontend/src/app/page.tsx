@@ -5,8 +5,13 @@ import { Building2, Users, LayoutDashboard } from "lucide-react";
 
 export default function RootLandingPage() {
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
-      <div className="max-w-4xl w-full space-y-8 text-center">
+    <main className="relative min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 overflow-hidden">
+      <div 
+        className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-20 pointer-events-none mix-blend-luminosity" 
+        style={{ backgroundImage: "url('/distributor-bg.jpeg')" }} 
+      />
+      <div className="fixed inset-0 z-0 bg-black/70 pointer-events-none" />
+      <div className="relative z-10 max-w-4xl w-full space-y-8 text-center">
         <div className="space-y-2">
           <h1 className="text-5xl font-bold tracking-tighter bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
             VendorLock AI
@@ -58,6 +63,6 @@ export default function RootLandingPage() {
           &copy; 2026 VendorLock AI. All rights reserved.
         </div>
       </div>
-    </div>
+    </main>
   );
 }
