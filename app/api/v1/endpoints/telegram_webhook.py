@@ -52,6 +52,19 @@ async def telegram_webhook(
             logger.info(f"[TG] MYSCORE command from {chat_id}")
             # In production: look up retailer by chat_id and return score
             return {"ok": True, "update_id": update_id, "handled": "MYSCORE"}
+            
+        # Handle /start command (Deep linking)
+        if text.startswith("/start"):
+            parts = text.split(" ")
+            if len(parts) > 1:
+                retailer_id = parts[1]
+                logger.info(f"[TG] Deep link start from chat {chat_id} for retailer {retailer_id}")
+                try:
+                    await supabase_service.link_retailer_chat(retailer_id, chat_id)
+                    logger.info(f"[TG] Linked chat {chat_id} to retailer {retailer_id}")
+                except Exception as e:
+                    logger.error(f"[TG] Error linking retailer: {e}")
+            return {"ok": True, "update_id": update_id, "handled": "START"}
 
         # Route to Agent 1 for intent parsing
         if text and len(text.strip()) > 2:

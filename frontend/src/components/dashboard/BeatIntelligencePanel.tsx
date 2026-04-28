@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { salesmen, ghostVisitAlerts, beatPlan } from "@/lib/mock-data";
+import { salesmen, ghostVisitAlerts, beatPlan as mockBeatPlan } from "@/lib/mock-data";
 import { formatInr } from "@/lib/helpers";
 import "leaflet/dist/leaflet.css";
 
@@ -122,6 +122,20 @@ const MapPlaceholder = () => {
 };
 
 export default function BeatIntelligencePanel() {
+  const [liveBeatPlan, setLiveBeatPlan] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Assuming salesmanId 'sm-1' for demo purposes
+    import("@/lib/api-client").then(({ getBeatPlan }) => {
+      getBeatPlan("sm-1").then((data) => {
+        if (data && data.beat_plan && data.beat_plan.length > 0) {
+          setLiveBeatPlan(data.beat_plan);
+        }
+      }).catch(console.error);
+    });
+  }, []);
+
+  const displayBeatPlan = liveBeatPlan.length > 0 ? liveBeatPlan : mockBeatPlan;
   const totalGhostAlerts = salesmen.reduce((sum, sm) => sum + sm.ghostVisitCount, 0);
 
   return (
@@ -302,7 +316,7 @@ export default function BeatIntelligencePanel() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {beatPlan.map((bp, i) => {
+                  {displayBeatPlan.map((bp, i) => {
                     const hasRisk = bp.riskFlags.length > 0;
                     return (
                       <TableRow

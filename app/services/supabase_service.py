@@ -101,6 +101,12 @@ async def create_retailer(tenant_id: str, data: Dict) -> Dict:
     return result.data[0] if result.data else data
 
 
+async def link_retailer_chat(retailer_id: str, chat_id: int) -> Dict:
+    sb = get_supabase()
+    result = sb.table("retailers").update({"telegram_chat_id": chat_id}).eq("id", retailer_id).execute()
+    return result.data[0] if result.data else {"id": retailer_id, "telegram_chat_id": chat_id}
+
+
 # ── Orders ────────────────────────────────────────────────────────────────────
 
 async def create_order(tenant_id: str, data: Dict) -> Dict:

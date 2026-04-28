@@ -1,11 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { expiryBatches, returnRequests } from "@/lib/mock-data";
+import { expiryBatches as mockExpiryBatches, returnRequests } from "@/lib/mock-data";
 import { formatInr, expiryRiskClass, returnVerdictClass } from "@/lib/helpers";
 import { Download, Plus, Calendar, AlertTriangle, ArrowRightLeft, Monitor, Eye } from "lucide-react";
 
@@ -14,9 +15,23 @@ interface Props { onAction: (msg: string) => void; }
 const fadeUp = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
 
 export default function ExpiryCalendarPanel({ onAction }: Props) {
-  const criticalBatches = expiryBatches.filter((b) => b.risk === "RED");
-  const warningBatches = expiryBatches.filter((b) => b.risk === "AMBER");
-  const safeBatches = expiryBatches.filter((b) => b.risk === "GREEN");
+  const [liveBatches, setLiveBatches] = useState<any[]>([]);
+
+  useEffect(() => {
+    import("@/lib/api-client").then(({ listBatches }) => {
+      listBatches().then((data) => {
+        if (data && data.batches && data.batches.length > 0) {
+          setLiveBatches(data.batches);
+        }
+      }).catch(console.error);
+    });
+  }, []);
+
+  const displayBatches = liveBatches.length > 0 ? liveBatches : mockExpiryBatches;
+
+  const criticalBatches = displayBatches.filter((b) => b.risk === "RED");
+  const warningBatches = displayBatches.filter((b) => b.risk === "AMBER");
+  const safeBatches = displayBatches.filter((b) => b.risk === "GREEN");
 
   return (
     <section className="space-y-6">

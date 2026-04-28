@@ -100,9 +100,6 @@ export default function DistributorControlTower() {
   const [summary, setSummary] = useState<any>(null);
 
   useEffect(() => {
-    // For local dev, hardcode a token so it doesn't fail immediately
-    setAuthToken("dev-token");
-
     const fetchData = async () => {
       setIsDataLoading(true);
       try {
@@ -560,7 +557,7 @@ export default function DistributorControlTower() {
               {/* ── Panel 2: Trust Map (Split Pane) ────────────────────── */}
               {activePanel === "trust-map" && (
                 <motion.div key="trust" {...fadeUp} className="bg-[#0f172a] min-h-screen -mx-4 -my-5 px-4 py-5">
-                  <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4 h-[calc(100vh-140px)]">
+                  <div className="grid grid-cols-1 gap-4 h-[calc(100vh-140px)]">
                     {/* Left Pane: Table */}
                     <div className="bg-slate-800/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden flex flex-col">
                       {/* Header with Search */}
@@ -588,34 +585,34 @@ export default function DistributorControlTower() {
                         <Table className="text-sm">
                           <TableHeader className="bg-slate-800/30 sticky top-0">
                             <TableRow className="border-b border-white/5">
-                              <SortableHead title="Retailer" value="name" onSort={onSort} />
-                              <SortableHead title="Trust Score" value="trustScore" onSort={onSort} />
-                              <SortableHead title="Tier" value="tier" onSort={onSort} />
-                              <SortableHead title="Outstanding" value="outstanding" onSort={onSort} />
-                              <SortableHead title="Credit Limit" value="creditLimit" onSort={onSort} />
-                              <SortableHead title="Last Payment" value="lastPaymentDate" onSort={onSort} />
-                              <SortableHead title="Trend" value="trend" onSort={onSort} />
+                              <SortableHead title="Retailer" value="name" onSort={onSort} className="pl-6" />
+                              <SortableHead title="Trust Score" value="trustScore" onSort={onSort} className="pl-6" />
+                              <SortableHead title="Tier" value="tier" onSort={onSort} className="pl-6" />
+                              <SortableHead title="Outstanding" value="outstanding" onSort={onSort} className="pl-6" />
+                              <SortableHead title="Credit Limit" value="creditLimit" onSort={onSort} className="pl-6" />
+                              <SortableHead title="Last Payment" value="lastPaymentDate" onSort={onSort} className="pl-6" />
+                              <SortableHead title="Trend" value="trend" onSort={onSort} className="pl-6" />
                             </TableRow>
                           </TableHeader>
                           <TableBody>
                             {trustRows.map((r, i) => (
                               <TableRow key={r.id} className="border-b border-white/5 hover:bg-slate-700/30 cursor-pointer transition-colors" onClick={() => setSelectedRetailer(r)}>
-                                <TableCell className="px-3 py-3">
+                                <TableCell className="pl-6 pr-3 py-3">
                                   <p className="font-medium text-slate-200">{r.name}</p>
                                   {r.hindiName && <p className="text-xs text-slate-500">{r.hindiName}</p>}
                                 </TableCell>
-                                <TableCell className="px-3 py-3">
+                                <TableCell className="pl-6 pr-3 py-3">
                                   <span className={`font-mono font-medium ${r.trustScore >= 80 ? "text-emerald-400" : r.trustScore >= 50 ? "text-amber-400" : "text-red-400"}`}>{r.trustScore}</span>
                                 </TableCell>
-                                <TableCell className="px-3 py-3">
+                                <TableCell className="pl-6 pr-3 py-3">
                                   <Badge className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.tier === "A" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : r.tier === "B" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : r.tier === "C" ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
                                     Tier {r.tier}
                                   </Badge>
                                 </TableCell>
-                                <TableCell className="px-3 py-3 font-mono text-slate-300">{formatInr(r.outstanding)}</TableCell>
-                                <TableCell className="px-3 py-3 font-mono text-slate-300">{formatInr(r.creditLimit)}</TableCell>
-                                <TableCell className="px-3 py-3 font-mono text-slate-400">{formatDateStable(r.lastPaymentDate)}</TableCell>
-                                <TableCell className="px-3 py-3"><span className={`text-lg ${trendClass(r.trend)}`}>{trendArrow(r.trend)}</span></TableCell>
+                                <TableCell className="pl-6 pr-3 py-3 font-mono text-slate-300">{formatInr(r.outstanding)}</TableCell>
+                                <TableCell className="pl-6 pr-3 py-3 font-mono text-slate-300">{formatInr(r.creditLimit)}</TableCell>
+                                <TableCell className="pl-6 pr-3 py-3 font-mono text-slate-400">{formatDateStable(r.lastPaymentDate)}</TableCell>
+                                <TableCell className="pl-6 pr-3 py-3"><span className={`text-lg ${trendClass(r.trend)}`}>{trendArrow(r.trend)}</span></TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
@@ -623,104 +620,66 @@ export default function DistributorControlTower() {
                       </div>
                     </div>
 
-                    {/* Right Pane: Score Breakdown Sidebar */}
-                    <div className="bg-slate-800/40 backdrop-blur-md border border-white/5 rounded-xl overflow-hidden flex flex-col">
-                      <div className="p-4 border-b border-white/5">
-                        <h3 className="text-sm font-semibold text-slate-200">Score Breakdown</h3>
-                        {selectedRetailer ? (
-                          <p className="text-xs text-slate-400 mt-1">{selectedRetailer.name}</p>
-                        ) : (
-                          <p className="text-xs text-slate-500 mt-1">Select a retailer from the list</p>
-                        )}
-                      </div>
-                      <div className="flex-1 overflow-auto p-4">
-                        {selectedRetailer ? (
-                          <>
-                            {/* Summary Stats */}
-                            <div className="grid grid-cols-2 gap-2">
-                              <div className="bg-slate-900/50 rounded-lg p-3">
-                                <p className="text-[10px] uppercase text-slate-500 mb-1">Outstanding</p>
-                                <p className="text-sm font-mono font-medium text-slate-200">{formatInr(selectedRetailer.outstanding)}</p>
-                              </div>
-                              <div className="bg-slate-900/50 rounded-lg p-3">
-                                <p className="text-[10px] uppercase text-slate-500 mb-1">Credit Limit</p>
-                                <p className="text-sm font-mono font-medium text-slate-200">{formatInr(selectedRetailer.creditLimit)}</p>
-                              </div>
-                            </div>
-
-                             {/* --- SCORE BREAKDOWN SECTION --- */}
-                             <div className="mt-8 px-4">
-                               <h3 className="text-xs font-semibold text-slate-500 tracking-wider mb-4 uppercase">Score Breakdown</h3>
-                               <div className="space-y-4">
-                                 {[
-                                   { label: "Payment History", val: "95/100", p: "95%", c: "bg-blue-500", tc: "text-blue-400" },
-                                   { label: "Credit Utilization", val: "65/100", p: "65%", c: "bg-orange-500", tc: "text-orange-400" },
-                                   { label: "Order Frequency", val: "88/100", p: "88%", c: "bg-blue-500", tc: "text-blue-400" },
-                                   { label: "Return Rate", val: "92/100", p: "92%", c: "bg-emerald-500", tc: "text-emerald-400" },
-                                   { label: "Scheme Compliance", val: "78/100", p: "78%", c: "bg-blue-500", tc: "text-blue-400" },
-                                   { label: "Market Tenure", val: "85/100", p: "85%", c: "bg-blue-500", tc: "text-blue-400" }
-                                 ].map((m, i) => (
-                                   <div key={i}>
-                                     <div className="flex justify-between text-sm mb-1">
-                                       <span className="text-slate-300">{m.label}</span>
-                                        <span className={m.tc + " font-medium"}>{m.val}</span>
-                                     </div>
-                                     <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-                                        <div className={"h-full " + m.c + " rounded-full"} style={{ width: m.p }}></div>
-                                     </div>
-                                   </div>
-                                 ))}
-                               </div>
-                             </div>
-
-                             {/* --- BOTTOM ACTION BUTTONS --- */}
-                             <div className="mt-8 pt-6 px-4 border-t border-white/5 space-y-3 pb-6">
-                               <button className="w-full bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30 rounded-lg py-3 flex items-center justify-center font-medium transition-all">
-                                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                 Issue Trust Certificate
-                               </button>
-                               <button className="w-full bg-transparent text-slate-300 border border-slate-600 hover:bg-slate-800 rounded-lg py-3 font-medium transition-all">
-                                 View Full Profile
-                               </button>
-                             </div>
-                          </>
-                        ) : (
-                          <div className="flex items-center justify-center h-full text-center">
-                            <p className="text-sm text-slate-500">Click a retailer to view details</p>
-                          </div>
-                        )}
-                      </div>
                     </div>
-                  </div>
 
                   {/* Detail Sheet (for mobile/small screens) */}
                   <Sheet open={Boolean(selectedRetailer)} onOpenChange={(o) => { if (!o) setSelectedRetailer(null); }}>
                     {selectedRetailer && (
-                      <SheetContent side="right" className="overflow-y-auto w-full sm:max-w-md border-l border-white/10 bg-[#0f172a]/95 backdrop-blur-xl">
-                        <SheetHeader>
-                          <SheetTitle className="text-slate-200">{selectedRetailer.name}</SheetTitle>
-                          <SheetDescription className="text-slate-400">
+                      <SheetContent side="right" className="overflow-y-auto w-full sm:max-w-md border-l border-white/10 bg-[#0f172a]/95 backdrop-blur-xl px-6 py-8">
+                        <SheetHeader className="mb-6">
+                          <SheetTitle className="text-2xl font-bold text-slate-100">{selectedRetailer.name}</SheetTitle>
+                          <SheetDescription className="text-slate-400 text-sm">
                             Trust Score <span className={`font-mono font-bold ${selectedRetailer.trustScore >= 80 ? "text-emerald-500" : selectedRetailer.trustScore >= 50 ? "text-amber-500" : "text-red-500"}`}>{selectedRetailer.trustScore}</span> · Tier {selectedRetailer.tier}
                           </SheetDescription>
                         </SheetHeader>
-                        <div className="mt-6 space-y-4">
-                          <p className="text-xs uppercase tracking-widest text-slate-500">Score Breakdown</p>
+
+                        {/* Summary Stats */}
+                        <div className="grid grid-cols-2 gap-3 mb-8">
+                          <div className="bg-slate-900/60 rounded-xl p-4 border border-white/5">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Outstanding</p>
+                            <p className="text-lg font-mono font-bold text-slate-200">{formatInr(selectedRetailer.outstanding)}</p>
+                          </div>
+                          <div className="bg-slate-900/60 rounded-xl p-4 border border-white/5">
+                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-1">Credit Limit</p>
+                            <p className="text-lg font-mono font-bold text-slate-200">{formatInr(selectedRetailer.creditLimit)}</p>
+                          </div>
+                        </div>
+
+                        <div className="mb-8 space-y-5">
+                          <p className="text-[11px] font-semibold uppercase tracking-widest text-slate-500">Score Breakdown</p>
                           {factorData(selectedRetailer).map((f, i) => (
                             <motion.div key={f.label} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.08 }}>
-                              <div className="mb-1.5 flex items-center justify-between text-sm">
-                                <p className="text-slate-300">{f.label}</p>
-                                <p className={`font-mono font-bold ${scoreColor(f.value)}`}>{f.value}</p>
+                              <div className="mb-2 flex items-center justify-between text-sm">
+                                <p className="text-slate-300 font-medium">{f.label}</p>
+                                <p className={`font-mono font-bold ${scoreColor(f.value)}`}>{f.value}/100</p>
                               </div>
-                              <div className="h-2 rounded-full bg-slate-700/50">
-                                <motion.div className={`h-2 rounded-full ${scoreBarColor(f.value)}`} initial={{ width: 0 }} animate={{ width: `${Math.max(5, f.value)}%` }} transition={{ duration: 0.8, delay: i * 0.08, ease: "easeOut" }} />
+                              <div className="h-2 rounded-full bg-slate-800 border border-slate-700/50">
+                                <motion.div className={`h-full rounded-full ${scoreBarColor(f.value)}`} initial={{ width: 0 }} animate={{ width: `${Math.max(5, f.value)}%` }} transition={{ duration: 0.8, delay: i * 0.08, ease: "easeOut" }} />
                               </div>
                             </motion.div>
                           ))}
                         </div>
-                        <div className="mt-6 pt-4 space-y-2 text-sm border-t border-white/10 text-slate-400">
-                          <p>Outstanding: <span className="font-mono font-semibold text-slate-200">{formatInr(selectedRetailer.outstanding)}</span></p>
-                          <p>Credit Limit: <span className="font-mono font-semibold text-slate-200">{formatInr(selectedRetailer.creditLimit)}</span></p>
-                          <p>Last Payment: <span className="font-mono font-semibold text-slate-200">{formatDateStable(selectedRetailer.lastPaymentDate)}</span></p>
+
+                        {/* Action Buttons in Sheet */}
+                        <div className="mt-8 pt-6 space-y-3 border-t border-white/10">
+                          <button
+                            onClick={() => {
+                              const botUrl = `https://t.me/VendorLockBot?start=${selectedRetailer.id}`;
+                              navigator.clipboard.writeText(`Hello ${selectedRetailer.name}, please place your orders using our AI Bot: ${botUrl}`);
+                              toast.success("Bot link copied to clipboard!");
+                            }}
+                            className="w-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30 rounded-lg py-3 flex items-center justify-center font-medium transition-all"
+                          >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            Share Bot Link
+                          </button>
+                          <button className="w-full bg-blue-500/20 text-blue-400 border border-blue-500/50 hover:bg-blue-500/30 rounded-lg py-3 flex items-center justify-center font-medium transition-all">
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            Issue Trust Certificate
+                          </button>
+                          <button className="w-full bg-transparent text-slate-300 border border-slate-600 hover:bg-slate-800 rounded-lg py-3 font-medium transition-all">
+                            View Full Profile
+                          </button>
                         </div>
                       </SheetContent>
                     )}
@@ -729,7 +688,7 @@ export default function DistributorControlTower() {
               )}
 
               {/* ── Panels 3–7 ───────────────────────────────────── */}
-              {activePanel === "credit-decisions" && <motion.div key="credit" {...fadeUp}><CreditDecisionPanel onAction={setLastAction} /></motion.div>}
+              {activePanel === "credit-decisions" && <motion.div key="credit" {...fadeUp}><CreditDecisionPanel onAction={setLastAction} orders={orderFeed} alerts={alerts} retailers={retailers} /></motion.div>}
               {activePanel === "scheme-leakage" && <motion.div key="scheme" {...fadeUp}><SchemeLeakagePanel /></motion.div>}
               {activePanel === "beat-intelligence" && <motion.div key="beat" {...fadeUp}><BeatIntelligencePanel /></motion.div>}
               {activePanel === "expiry-calendar" && <motion.div key="expiry" {...fadeUp}><ExpiryCalendarPanel onAction={setLastAction} /></motion.div>}
@@ -742,9 +701,9 @@ export default function DistributorControlTower() {
   );
 }
 
-function SortableHead({ title, value, onSort }: { title: string; value: SortKey; onSort: (v: SortKey) => void }) {
+function SortableHead({ title, value, onSort, className }: { title: string; value: SortKey; onSort: (v: SortKey) => void; className?: string }) {
   return (
-    <TableHead className="px-3 py-3 text-slate-400 text-xs uppercase tracking-wider">
+    <TableHead className={`px-3 py-3 text-slate-400 text-xs uppercase tracking-wider ${className || ""}`}>
       <button onClick={() => onSort(value)} className="inline-flex items-center gap-1 hover:text-slate-200 transition">
         {title} <span className="text-[10px] opacity-50">↕</span>
       </button>

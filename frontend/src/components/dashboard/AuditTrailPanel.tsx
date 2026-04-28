@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,17 +19,30 @@ const fadeUp = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, 
 export default function AuditTrailPanel() {
   const [filterType, setFilterType] = useState<AuditEventType | "ALL">("ALL");
   const [filterRetailer, setFilterRetailer] = useState("");
+  const [liveEvents, setLiveEvents] = useState<any[]>([]);
 
-  const tamperedCount = auditEvents.filter((e) => e.status === "TAMPERED").length;
+  useEffect(() => {
+    import("@/lib/api-client").then(({ getAuditTrail }) => {
+      getAuditTrail().then((data) => {
+        if (data && data.events && data.events.length > 0) {
+          setLiveEvents(data.events);
+        }
+      }).catch(console.error);
+    });
+  }, []);
+
+  const displayEvents = liveEvents.length > 0 ? liveEvents : auditEvents;
+
+  const tamperedCount = displayEvents.filter((e) => e.status === "TAMPERED").length;
   const chainIntact = tamperedCount === 0;
 
   const filtered = useMemo(() => {
-    return auditEvents.filter((e) => {
+    return displayEvents.filter((e) => {
       if (filterType !== "ALL" && e.eventType !== filterType) return false;
       if (filterRetailer && !e.retailer.toLowerCase().includes(filterRetailer.toLowerCase())) return false;
       return true;
     });
-  }, [filterType, filterRetailer]);
+  }, [filterType, filterRetailer, displayEvents]);
 
   const handleExport = () => {
     const header = "Timestamp,Event Type,Retailer,Description,SHA-256 Hash,Status\n";

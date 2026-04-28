@@ -1,19 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { schemes, retailerSchemes } from "@/lib/mock-data";
+import { schemes as mockSchemes, retailerSchemes } from "@/lib/mock-data";
 import { formatInr } from "@/lib/helpers";
 import { AlertTriangle, TrendingUp, Download, Calendar, ArrowRight, Eye, Gavel } from "lucide-react";
 
-const totalLeakage = schemes.reduce((sum, s) => sum + s.leakage, 0);
 const fadeUp = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
 
 export default function SchemeLeakagePanel() {
+  const [liveSchemes, setLiveSchemes] = useState<any[]>([]);
+
+  useEffect(() => {
+    import("@/lib/api-client").then(({ listSchemes }) => {
+      listSchemes().then((data) => {
+        if (data && data.schemes && data.schemes.length > 0) {
+          setLiveSchemes(data.schemes);
+        }
+      }).catch(console.error);
+    });
+  }, []);
+
+  const displaySchemes = liveSchemes.length > 0 ? liveSchemes : mockSchemes;
+  const totalLeakage = displaySchemes.reduce((sum, s) => sum + (s.leakage || 0), 0);
+
   return (
     <section className="space-y-6">
       {/* Page Header */}

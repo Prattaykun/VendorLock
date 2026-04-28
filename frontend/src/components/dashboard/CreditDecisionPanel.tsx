@@ -5,17 +5,64 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { creditOrders, velocityAlerts } from "@/lib/mock-data";
+import { creditOrders as mockCreditOrders, velocityAlerts as mockVelocityAlerts } from "@/lib/mock-data";
 import { formatInr, verdictClass, scoreColor } from "@/lib/helpers";
 import { AlertTriangle, TrendingUp, FileCheck, Ban, Edit, Send, Check, ShieldCheck, Gavel, Filter, ArrowRight } from "lucide-react";
+import type { Order, Alert, Retailer } from "@/types/dashboard";
 
-interface Props { onAction: (msg: string) => void; }
+interface Props { 
+  onAction: (msg: string) => void;
+  orders?: any[];
+  alerts?: any[];
+  retailers?: any[];
+}
 
 const fadeUp = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
 
-export default function CreditDecisionPanel({ onAction }: Props) {
+export default function CreditDecisionPanel({ onAction, orders = [], alerts = [], retailers = [] }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editMsg, setEditMsg] = useState("");
+
+  // Map live orders to creditOrders format, fallback to mock if no live orders need confirmation
+  const liveCreditOrders = orders
+    .filter(o => o.status === "PENDING_CONFIRMATION" || o.status === "BLOCKED")
+    .map(o => {
+      const retailer = retailers.find(r => r.id === o.retailerId) || { trustScore: 50, outstanding: 10000, creditLimit: 50000 };
+      const out = retailer.outstanding || 0;
+      const limit = retailer.creditLimit || 50000;
+      const val = o.orderValue || 0;
+      
+      let verdict = "APPROVE";
+      if (out + val > limit) verdict = "BLOCK";
+      else if (retailer.trustScore < 60) verdict = "CONDITIONAL";
+
+      return {
+        id: o.id,
+        retailerName: o.retailerName,
+        retailerTrustScore: retailer.trustScore,
+        orderValue: val,
+        items: [`${o.itemCount} SKUs (Live)`],
+        currentOutstanding: out,
+        postOrderOutstanding: out + val,
+        verdict,
+        draftMessage: `Auto-generated draft for ${o.id}`,
+        utilisationPercent: Math.round((out / limit) * 100) || 0
+      };
+    });
+
+  const displayCreditOrders = liveCreditOrders.length > 0 ? liveCreditOrders : mockCreditOrders;
+
+  // Map live alerts to velocity alerts format
+  const liveVelocityAlerts = alerts
+    .filter(a => a.title?.toLowerCase().includes("utilization") || a.title?.toLowerCase().includes("credit"))
+    .map(a => ({
+      retailerId: a.id,
+      retailerName: a.title,
+      utilisationJump: 25,
+      currentUtilisation: 90
+    }));
+
+  const displayVelocityAlerts = liveVelocityAlerts.length > 0 ? liveVelocityAlerts : mockVelocityAlerts;
 
   return (
     <section className="mt-6 p-6 w-full max-w-[1400px] mx-auto flex flex-col gap-6">
@@ -40,7 +87,7 @@ export default function CreditDecisionPanel({ onAction }: Props) {
       </motion.div>
 
       {/* Credit Velocity Alert Banner */}
-      {velocityAlerts.length > 0 && (
+      {displayVelocityAlerts.length > 0 && (
         <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
           <div className="bg-rose-500/10 border border-rose-500/30 rounded-lg p-4 flex items-start gap-4 shadow-[0_0_15px_rgba(255,180,171,0.05)] backdrop-blur-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-rose-500/50 to-transparent"></div>
@@ -75,7 +122,7 @@ export default function CreditDecisionPanel({ onAction }: Props) {
 
           {/* Queue List (Scrollable) */}
           <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-4">
-            {creditOrders.map((co, i) => (
+            {displayCreditOrders.map((co, i) => (
               <motion.div
                 key={co.id}
                 initial={{ opacity: 0, y: 12 }}
