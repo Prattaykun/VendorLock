@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { Shield, BarChart3 } from "lucide-react";
 
 import { Alert } from "@/types/dashboard";
 
@@ -9,19 +11,21 @@ type DashboardLayoutProps = {
 };
 
 const navItems = [
-  { label: "Command Center", href: "/" },
-  { label: "Trust Map", href: "#" },
-  { label: "Credit Decision", href: "#" },
-  { label: "Scheme Leakage", href: "#" },
-  { label: "Beat Intelligence", href: "#" },
-  { label: "Expiry & Returns", href: "#" },
-  { label: "Audit Trail", href: "#" },
+  { label: "Command Center", href: "/", icon: Shield },
+  { label: "Analytics", href: "/company", icon: BarChart3 },
+  { label: "Trust Map", href: "#", icon: null },
+  { label: "Credit Decision", href: "#", icon: null },
+  { label: "Scheme Leakage", href: "#", icon: null },
+  { label: "Beat Intelligence", href: "#", icon: null },
+  { label: "Expiry & Returns", href: "#", icon: null },
+  { label: "Audit Trail", href: "#", icon: null },
 ];
 
 export default function DashboardLayout({
   children,
   criticalAlerts,
 }: DashboardLayoutProps) {
+  const pathname = usePathname();
   const unresolvedCriticalAlerts = criticalAlerts.filter(
     (alert) => alert.type === "CRITICAL" && !alert.resolved,
   );
@@ -40,16 +44,24 @@ export default function DashboardLayout({
 
           <nav className="overflow-x-auto px-3 py-3 lg:overflow-visible">
             <ul className="flex gap-2 lg:flex-col">
-              {navItems.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="block whitespace-nowrap rounded-lg px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-800 hover:text-white"
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {navItems.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className={`flex items-center gap-3 whitespace-nowrap rounded-lg px-3 py-2 text-sm transition ${
+                        isActive
+                          ? "bg-blue-500/10 text-blue-500 border-r-2 border-blue-500"
+                          : "text-slate-200 hover:bg-slate-800 hover:text-white"
+                      }`}
+                    >
+                      {item.icon && <item.icon size={18} />}
+                      <span>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
         </aside>

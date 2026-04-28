@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Building2, Users, LayoutDashboard } from "lucide-react";
 
 export default function RootLandingPage() {

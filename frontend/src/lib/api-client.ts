@@ -3,7 +3,7 @@
  * Handles auth, data fetching, and Agent pipeline invocations.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
 
 // ── Auth Token Management ─────────────────────────────────────────────────────
 
@@ -266,6 +266,17 @@ export async function verifyCertificate(certificateId: string) {
 }
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
+
+export async function getPassThroughMetrics() {
+  try {
+    return await apiFetch("/analytics/pass-through-metrics");
+  } catch (error) {
+    console.warn("Failed to fetch pass-through metrics from API, using mock data:", error);
+    // Import mock data as fallback
+    const { passThroughMetrics } = await import("./mock-data");
+    return passThroughMetrics;
+  }
+}
 
 export async function getTrustDistribution() {
   return apiFetch("/analytics/trust-distribution");

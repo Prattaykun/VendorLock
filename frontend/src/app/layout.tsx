@@ -36,10 +36,24 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${hindiSans.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${hindiSans.variable} h-full antialiased dark`}
       data-theme="dark"
       suppressHydrationWarning
     >
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"
+        />
+        <style>{`
+          .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            font-family: 'Material Symbols Outlined';
+          }
+        `}</style>
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <TooltipProvider>

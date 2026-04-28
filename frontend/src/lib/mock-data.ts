@@ -120,6 +120,84 @@ export const returnRequests: ReturnRequest[] = [
   { id: "rr-3", retailerName: "देसाई स्टोर्स", items: "Sunfeast Dark Fantasy", quantity: 15, claimedReason: "Wrong SKU delivered", agentVerdict: "EXPIRED_WINDOW", value: 2250 },
 ];
 
+// ── Pass-Through Analytics ──────────────────────────────────────────────────────
+export const passThroughMetrics = {
+  aggregate_pass_through: {
+    percentage: 68.5,
+    trend: "UP",
+    trend_period: "Last 30 days",
+    total_disbursed: "₹1,847,200",
+    verified_reach: "₹1,264,008"
+  },
+  regional_leakage: [
+    {
+      region_id: "rg-1",
+      region_name: "South Mumbai",
+      leakage_percentage: 24.5,
+      status: "CRITICAL",
+      confidence: 94,
+      latency_days: 3,
+      likely_cause: "Margin pooling in Dadar-Vile Parle corridor"
+    },
+    {
+      region_id: "rg-2",
+      region_name: "Thane & Surrounding",
+      leakage_percentage: 31.2,
+      status: "CRITICAL",
+      confidence: 89,
+      latency_days: 2,
+      likely_cause: "Unauthorized redistributors, gray market"
+    },
+    {
+      region_id: "rg-3",
+      region_name: "Central Mumbai",
+      leakage_percentage: 18.7,
+      status: "WARNING",
+      confidence: 85,
+      latency_days: 4,
+      likely_cause: "Small retailers holding excess inventory"
+    }
+  ],
+  monthly_trends: [
+    { month: "Feb 2026", pass_through: 62.3, cost_basis: 1420000 },
+    { month: "Mar 2026", pass_through: 65.1, cost_basis: 1580000 },
+    { month: "Apr 2026", pass_through: 68.5, cost_basis: 1847200, is_current: true }
+  ],
+  sku_fragility: [
+    {
+      category: "Soaps & Detergents",
+      leakage_percentage: 28.5,
+      status: "CRITICAL",
+      insight: "Low weight, high value density attracts diversion"
+    },
+    {
+      category: "Noodles & Instant Foods",
+      leakage_percentage: 35.2,
+      status: "CRITICAL",
+      insight: "Longest supply chain exposure; gray market hotbed"
+    },
+    {
+      category: "Beverages",
+      leakage_percentage: 22.1,
+      status: "WARNING",
+      insight: "High volume but moderate leakage"
+    },
+    {
+      category: "Biscuits & Snacks",
+      leakage_percentage: 19.4,
+      status: "WARNING",
+      insight: "Perishable nature limits diversion window"
+    }
+  ],
+  intelligence_advisory: {
+    priority: "CRITICAL",
+    summary: "Thane & surrounding region experiencing severe scheme benefit leakage (31% loss). Gray market redistribution detected.",
+    detail: "Analysis of order patterns and retailer transaction data reveals systematic benefit leakage in the Thane-Kalyan-Navi Mumbai corridor. Unauthorized secondary distributors moving high-margin schemes (Maggi, Noodles) outside formal channel.",
+    mitigation_strategy: "1. Activate GPS-tracked logistics for Thane shipments. 2. Implement batch-level QR verification at retailer receipt points. 3. Increase audit frequency for top 5 retailers in Thane. 4. Deploy field agents for compliance checks.",
+    confidence: 87
+  }
+};
+
 // ── Audit Trail ─────────────────────────────────────────────────────────────────
 export const auditEvents: EventLog[] = [
   { id: "ev-1", timestamp: "2026-04-25T09:18:00.000Z", eventType: "ORDER", retailer: "Rao Mart", description: "Order ORD-0001 confirmed — ₹12,400", sha256Hash: "a3f2b8c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1", status: "INTACT" },
