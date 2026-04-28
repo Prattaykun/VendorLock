@@ -338,12 +338,12 @@ export default function DistributorControlTower() {
                     {/* Left Column (8 cols): Priority Actions */}
                     <div className="col-span-12 lg:col-span-8 flex flex-col gap-4">
                       {/* Priority Actions Header */}
-                      <div className="flex justify-between items-end">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                         <div>
                           <h3 className="text-lg font-semibold" style={{ color: "#d8e3fb" }}>Priority Actions</h3>
                           <p className="text-sm" style={{ color: "#c2c6d6" }}>Anomalies requiring immediate coordinator review.</p>
                         </div>
-                        <button className="text-sm flex items-center gap-1" style={{ color: "#adc6ff" }}>
+                        <button className="text-sm flex items-center gap-1 shrink-0 whitespace-nowrap self-start lg:self-auto" style={{ color: "#adc6ff" }}>
                           View All <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z" /></svg>
                         </button>
                       </div>
@@ -358,39 +358,39 @@ export default function DistributorControlTower() {
                           className="rounded-xl p-5"
                           style={{ backgroundColor: "#152031", border: "1px solid #424754", boxShadow: "0 0 0 1px rgba(255,255,255,0.05)" }}
                         >
-                          <div className="flex justify-between items-start mb-4">
-                            <div className="flex gap-4">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-4">
+                            <div className="flex gap-4 min-w-0 items-start">
                               <div className="w-12 h-12 rounded-lg flex items-center justify-center text-xl font-bold" style={{ backgroundColor: "#2a3548", border: "1px solid #8c909f", color: "#d8e3fb" }}>
                                 {card.retailerName.charAt(0)}
                               </div>
-                              <div>
-                                <h4 className="text-lg font-semibold" style={{ color: "#d8e3fb" }}>{card.retailerName}</h4>
-                                <p className="text-sm font-mono" style={{ color: "#c2c6d6" }}>{card.issueType}</p>
+                              <div className="min-w-0">
+                                <h4 className="text-lg font-semibold leading-tight whitespace-nowrap overflow-hidden text-ellipsis" style={{ color: "#d8e3fb" }}>{card.retailerName}</h4>
+                                <p className="text-sm font-mono mt-1" style={{ color: "#c2c6d6" }}>{card.issueType}</p>
                               </div>
                             </div>
-                            <span className="px-2 py-1 rounded text-xs font-medium flex items-center gap-1" style={{ backgroundColor: "rgba(255, 180, 171, 0.1)", color: "#ffb4ab", border: "1px solid rgba(255, 180, 171, 0.2)" }}>
+                            <span className="self-start px-2 py-1 rounded text-xs font-medium flex items-center gap-1" style={{ backgroundColor: "rgba(255, 180, 171, 0.1)", color: "#ffb4ab", border: "1px solid rgba(255, 180, 171, 0.2)" }}>
                               <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" /></svg>
                               Action Required
                             </span>
                           </div>
                           <div className="rounded-lg p-4 mb-4" style={{ backgroundColor: "rgba(4, 14, 31, 0.5)", border: "1px solid #424754" }}>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 items-start">
                               <div>
-                                <p className="text-xs uppercase mb-1" style={{ color: "#c2c6d6" }}>Issue Detected</p>
-                                <p className="text-sm" style={{ color: "#d8e3fb" }}>{card.recommendedAction.split('.')[0]}.</p>
+                                <p className="text-xs uppercase mb-1 tracking-wider" style={{ color: "#c2c6d6" }}>Issue Detected</p>
+                                <p className="text-sm leading-relaxed text-wrap" style={{ color: "#d8e3fb" }}>{card.recommendedAction.split('.')[0]}.</p>
                               </div>
                               <div>
-                                <p className="text-xs uppercase mb-1" style={{ color: "#c2c6d6" }}>System Recommendation</p>
-                                <p className="text-sm" style={{ color: "#d8e3fb" }}>{card.recommendedAction.split('.')[1] || "Review and approve action."}</p>
+                                <p className="text-xs uppercase mb-1 tracking-wider" style={{ color: "#c2c6d6" }}>System Recommendation</p>
+                                <p className="text-sm leading-relaxed text-wrap" style={{ color: "#d8e3fb" }}>{card.recommendedAction.split('.')[1]?.trim() || "Review and approve action."}</p>
                               </div>
                             </div>
                           </div>
-                          <div className="flex gap-3 justify-end">
-                            <button className="px-4 py-2 rounded-lg border text-sm flex items-center gap-2" style={{ borderColor: "#424754", color: "#d8e3fb" }}>
+                          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end sm:items-center">
+                            <button className="px-4 py-2 rounded-lg border text-sm flex items-center justify-center gap-2" style={{ borderColor: "#424754", color: "#d8e3fb" }}>
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" /></svg>
                               Edit & Send
                             </button>
-                            <button className="px-4 py-2 rounded-lg text-sm flex items-center gap-2" style={{ backgroundColor: "#adc6ff", color: "#002e6a" }}>
+                            <button className="px-4 py-2 rounded-lg text-sm flex items-center justify-center gap-2" style={{ backgroundColor: "#adc6ff", color: "#002e6a" }}>
                               <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" /></svg>
                               Approve Action
                             </button>
@@ -412,7 +412,7 @@ export default function DistributorControlTower() {
                               <svg className="w-4 h-4" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
                             </div>
                           </div>
-                          <div className="flex items-end justify-between">
+                          <div className="flex items-center justify-between gap-3 min-w-0">
                             <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>847</span>
                             <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(77, 142, 255, 0.15)", color: "#adc6ff" }}>+12%</span>
                           </div>
@@ -431,7 +431,7 @@ export default function DistributorControlTower() {
                               <svg className="w-4 h-4" style={{ color: "#b7c8e1" }} fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" /></svg>
                             </div>
                           </div>
-                          <div className="flex items-end justify-between">
+                          <div className="flex items-center justify-between gap-3 min-w-0">
                             <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>2,341</span>
                             <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(183, 200, 225, 0.15)", color: "#b7c8e1" }}>+8%</span>
                           </div>
@@ -450,7 +450,7 @@ export default function DistributorControlTower() {
                               <svg className="w-4 h-4" style={{ color: "#ffb4ab" }} fill="currentColor" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.15 3 2.15 0 .53-.39 1.39-2.7 1.39-1.78 0-2.63-.85-2.73-2.1h-2.2c.12 1.95 1.3 3.4 3.53 3.83V23h3v-2.15c1.95-.29 3.5-1.5 3.5-3.55 0-2.77-2.49-4.03-4.5-4.41z" /></svg>
                             </div>
                           </div>
-                          <div className="flex items-end justify-between">
+                          <div className="flex items-center justify-between gap-3 min-w-0">
                             <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>₹4.2L</span>
                             <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(255, 180, 171, 0.15)", color: "#ffb4ab" }}>-3%</span>
                           </div>
@@ -469,7 +469,7 @@ export default function DistributorControlTower() {
                               <svg className="w-4 h-4" style={{ color: "#bec6e0" }} fill="currentColor" viewBox="0 0 24 24"><path d="M23 8h-1.81c-.45 0-.81.37-.81.81h.01c-.01.22-.04.44-.09.66l1.9.01V9zm.01-.5c.01-.44.37-.81.81-.81V9zm-22 .01v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zm.01 1v.19c-.45 0-.81.37-.81.81H1c.45 0 .81-.37.81-.81zM2.82 21h18.36l-1.89.01V23H4.71v-.01l-1.89-.01zM7.24 14h1.66v3.01H7.24zm4.24 0h1.66v3.01h-1.66z" /></svg>
                             </div>
                           </div>
-                          <div className="flex items-end justify-between">
+                          <div className="flex items-center justify-between gap-3 min-w-0">
                             <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>67%</span>
                             <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(190, 198, 224, 0.15)", color: "#bec6e0" }}>Stable</span>
                           </div>
@@ -537,7 +537,7 @@ export default function DistributorControlTower() {
                             <div key={order.id} className="relative pl-6">
                               <div className="absolute left-0 top-1 w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: "#152031", border: `2px solid ${order.status === "CONFIRMED" ? "#adc6ff" : order.status === "BLOCKED" ? "#ffb4ab" : "#b7c8e1"}` }}>
                                 {order.status === "CONFIRMED" && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#adc6ff" }}></div>}
-                                {order.status === "BLOCKED" && <svg className="w-3 h-3" style={{ color: "#ffb4ab" }} fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 17.59 19 12 12z" /></svg>}
+                                {order.status === "BLOCKED" && <span className="inline-flex h-3 w-3 items-center justify-center rounded-full bg-rose-400 text-[8px] leading-none text-white">×</span>}
                               </div>
                               <div className="rounded-lg p-3" style={{ backgroundColor: "#2a3548", border: "1px solid rgba(66, 71, 84, 0.3)" }}>
                                 <div className="flex justify-between items-start mb-1">

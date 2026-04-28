@@ -65,7 +65,7 @@ export default function SchemeLeakagePanel() {
             <Eye className="w-5 h-5 text-slate-500 cursor-pointer hover:text-slate-200" />
           </div>
           <div className="flex flex-col gap-1">
-            <span className="text-4xl font-black text-rose-400 tracking-tight">₹{formatInr(totalLeakage)}</span>
+            <span className="text-4xl font-black text-rose-400 tracking-tight">{formatInr(totalLeakage)}</span>
             <div className="flex items-center gap-2 mt-2">
               <span className="flex items-center text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded text-xs font-medium">
                 <TrendingUp className="w-3.5 h-3.5 mr-1" />

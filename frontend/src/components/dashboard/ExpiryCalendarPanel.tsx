@@ -228,7 +228,7 @@ export default function ExpiryCalendarPanel({ onAction }: Props) {
             <Monitor className="w-5 h-5 text-slate-500" />
           </div>
           <div className="flex items-end gap-1 text-4xl font-black text-white mb-6">
-            $24.5<span className="text-2xl font-semibold text-slate-400 pb-1">k</span>
+            ₹24.5<span className="text-2xl font-semibold text-slate-400 pb-1">K</span>
           </div>
           {/* VaR Chart */}
           <div className="mt-auto h-[140px] flex items-end gap-2 px-2 relative border-b border-slate-800/50 pb-2">
