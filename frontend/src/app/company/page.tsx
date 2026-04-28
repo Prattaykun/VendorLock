@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FolderCog, BarChart3, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -29,15 +30,23 @@ export default function CompanyPage() {
             {/* Scheme Management Card */}
             <Link href="/scheme/upload" className="group">
               <Card className="bg-[#152031]/70 backdrop-blur-sm border border-white/10 hover:border-blue-500/50 transition-all h-full cursor-pointer">
-                <CardHeader>
-                  <div className="space-y-2">
-                    <CardTitle className="text-lg">Scheme Management</CardTitle>
-                    <CardDescription>Create and manage distribution schemes</CardDescription>
+                <CardHeader className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-blue-500/15 border border-blue-500/20 flex items-center justify-center">
+                      <FolderCog className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg">Scheme Management</CardTitle>
+                      <CardDescription>Create and manage distribution schemes</CardDescription>
+                    </div>
                   </div>
                 </CardHeader>
                 <Separator className="bg-slate-700/50" />
                 <CardContent className="pt-4">
-                  <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">Go to Scheme Management</p>
+                  <div className="flex items-center justify-between text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                    <span>Go to Scheme Management</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </CardContent>
               </Card>
             </Link>
@@ -45,15 +54,23 @@ export default function CompanyPage() {
             {/* Analytics Card */}
             <Link href="/scheme/analytics" className="group">
               <Card className="bg-[#152031]/70 backdrop-blur-sm border border-white/10 hover:border-emerald-500/50 transition-all h-full cursor-pointer">
-                <CardHeader>
-                  <div className="space-y-2">
-                    <CardTitle className="text-lg">Pass-Through Analytics</CardTitle>
-                    <CardDescription>Monitor distribution efficiency</CardDescription>
+                <CardHeader className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center">
+                      <BarChart3 className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg">Pass-Through Analytics</CardTitle>
+                      <CardDescription>Monitor distribution efficiency</CardDescription>
+                    </div>
                   </div>
                 </CardHeader>
                 <Separator className="bg-slate-700/50" />
                 <CardContent className="pt-4">
-                  <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors">View Analytics</p>
+                  <div className="flex items-center justify-between text-xs text-slate-500 group-hover:text-slate-400 transition-colors">
+                    <span>View Analytics</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </div>
                 </CardContent>
               </Card>
             </Link>

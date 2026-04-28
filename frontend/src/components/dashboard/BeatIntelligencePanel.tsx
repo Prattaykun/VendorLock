@@ -131,7 +131,7 @@ export default function BeatIntelligencePanel() {
         if (data && data.beat_plan && data.beat_plan.length > 0) {
           setLiveBeatPlan(data.beat_plan);
         }
-      }).catch(console.error);
+      }).catch(() => {});
     });
   }, []);
 

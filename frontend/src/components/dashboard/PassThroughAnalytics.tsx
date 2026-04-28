@@ -77,7 +77,7 @@ export default function PassThroughAnalytics() {
         const data = await getPassThroughMetrics();
         setMetrics(data);
       } catch (error) {
-        console.error("Failed to fetch metrics:", error);
+        // Silently fail and use mock data
       } finally {
         setLoading(false);
       }

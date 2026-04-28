@@ -22,7 +22,7 @@ export default function SchemeLeakagePanel() {
         if (data && data.schemes && data.schemes.length > 0) {
           setLiveSchemes(data.schemes);
         }
-      }).catch(console.error);
+      }).catch(() => {});
     });
   }, []);
 

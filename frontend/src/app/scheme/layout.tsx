@@ -12,8 +12,8 @@ export default function SchemeLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 h-full w-72 border-r border-slate-800 bg-slate-950 flex flex-col py-8 z-[60] shadow-2xl shadow-blue-900/10">
         <div className="px-6 mb-10 flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#4d8eff] flex items-center justify-center rounded-lg">
-            <span className="material-symbols-outlined text-[#001a42]">security</span>
+          <div className="w-10 h-10 bg-[#4d8eff] flex items-center justify-center rounded-lg overflow-hidden shadow-lg shadow-blue-500/30">
+            <img src="/logo-round.png" alt="VendorLock Logo" className="w-full h-full object-cover" />
           </div>
           <div>
             <h1 className="text-lg font-black text-blue-500 leading-none">VendorLock</h1>

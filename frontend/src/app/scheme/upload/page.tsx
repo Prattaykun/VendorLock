@@ -22,24 +22,26 @@ export default function UploadSchemePage() {
   };
 
   return (
-    <div className="max-w-[1200px] mx-auto">
+    <div className="max-w-[1280px] mx-auto px-6 sm:px-8 lg:px-10 space-y-10">
       {/* Header */}
-      <header className="mb-8">
-        <h2 className="font-headline-lg text-[30px] leading-[38px] font-semibold text-[#d8e3fb] mb-2">
+      <header className="mb-10 max-w-3xl">
+        <h2 className="font-headline-lg text-[30px] leading-[38px] font-semibold text-[#d8e3fb] mb-3 tracking-tight">
           Upload New Scheme
         </h2>
-        <p className="text-slate-400 font-body-md">Configure and deploy new distribution incentives across the network.</p>
+        <p className="text-slate-400 font-body-md leading-7 max-w-2xl">
+          Configure and deploy new distribution incentives across the network.
+        </p>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 xl:gap-10 items-start">
         {/* Left Column: File Upload & Targets */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-8">
           {/* Drag & Drop Area */}
           <div
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            className={`rounded-xl p-10 border-2 border-dashed flex flex-col items-center justify-center text-center group cursor-pointer transition-all ${
+            className={`rounded-xl p-12 border-2 border-dashed flex flex-col items-center justify-center text-center group cursor-pointer transition-all ${
               isDragging
                 ? "border-blue-500/50 bg-blue-500/10"
                 : "border-slate-800 bg-slate-950/60 hover:border-blue-500/50"
@@ -50,11 +52,13 @@ export default function UploadSchemePage() {
               borderTop: "1px solid rgba(255, 255, 255, 0.1)",
             }}
           >
-            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
               <span className="material-symbols-outlined text-[#adc6ff] text-3xl">upload_file</span>
             </div>
-            <h3 className="font-semibold text-[24px] leading-[32px] text-slate-100 mb-2">Drop scheme document here</h3>
-            <p className="text-slate-400 text-sm mb-6 max-w-xs">Supports PDF, XLSX, and CSV files containing SKU lists and discount structures.</p>
+            <h3 className="font-semibold text-[24px] leading-[32px] text-slate-100 mb-3 tracking-tight">Drop scheme document here</h3>
+            <p className="text-slate-400 text-sm leading-6 mb-8 max-w-sm">
+              Supports PDF, XLSX, and CSV files containing SKU lists and discount structures.
+            </p>
             <button className="bg-[#152031] border border-slate-700 text-slate-200 px-6 py-2 rounded-lg font-semibold hover:bg-slate-700 transition-colors">
               Browse Local Storage
             </button>
@@ -62,20 +66,20 @@ export default function UploadSchemePage() {
 
           {/* Target Selector */}
           <div
-            className="rounded-xl p-6 border border-slate-800"
+            className="rounded-xl p-8 border border-slate-800"
             style={{
               background: "rgba(15, 23, 42, 0.6)",
               backdropFilter: "blur(12px)",
               borderTop: "1px solid rgba(255, 255, 255, 0.1)",
             }}
           >
-            <h4 className="font-semibold text-[12px] leading-[16px] text-blue-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+            <h4 className="font-semibold text-[12px] leading-[16px] text-blue-500 uppercase tracking-widest mb-8 flex items-center gap-2">
               <span className="material-symbols-outlined text-sm">hub</span>
               Network Distribution Targets
             </h4>
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* Distributors */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
@@ -99,7 +103,7 @@ export default function UploadSchemePage() {
               </div>
 
               {/* Retailers */}
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <input
                     type="checkbox"
@@ -129,19 +133,19 @@ export default function UploadSchemePage() {
         {/* Right Column: AI Analysis */}
         <div className="lg:col-span-5 flex flex-col h-full">
           <div
-            className="rounded-xl p-6 border border-slate-800 flex-1 flex flex-col"
+            className="rounded-xl p-8 border border-slate-800 flex-1 flex flex-col"
             style={{
               background: "rgba(15, 23, 42, 0.6)",
               backdropFilter: "blur(12px)",
               borderTop: "1px solid rgba(255, 255, 255, 0.1)",
             }}
           >
-            <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center justify-between mb-10 gap-4">
               <h4 className="font-semibold text-[12px] leading-[16px] text-blue-500 uppercase tracking-widest flex items-center gap-2">
                 <span className="material-symbols-outlined text-sm">psychology</span>
                 Intelligence Insight
               </h4>
-              <button className="flex items-center gap-2 bg-blue-500 text-[#001a42] px-4 py-2 rounded-lg font-bold text-sm hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all active:scale-95">
+              <button className="flex items-center gap-2 bg-blue-500 text-[#001a42] px-4 py-2 rounded-lg font-bold text-sm whitespace-nowrap hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all active:scale-95">
                 <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "FILL 1" }}>
                   auto_awesome
                 </span>
@@ -149,22 +153,22 @@ export default function UploadSchemePage() {
               </button>
             </div>
 
-            <div className="flex-1 rounded-xl bg-slate-950/50 border border-slate-800/50 p-6 relative overflow-hidden">
+            <div className="flex-1 rounded-xl bg-slate-950/50 border border-slate-800/50 p-8 relative overflow-hidden">
               {/* Background Pulse for AI */}
               <div className="absolute top-0 right-0 p-4 opacity-10">
                 <span className="material-symbols-outlined text-6xl text-blue-500 animate-pulse">monitoring</span>
               </div>
 
-              <div className="relative z-10 space-y-4">
-                <div className="flex items-start gap-3">
+              <div className="relative z-10 space-y-6">
+                <div className="flex items-start gap-4">
                   <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2"></div>
-                  <p className="text-slate-300 font-body-md leading-relaxed italic">
+                  <p className="text-slate-300 font-body-md leading-8 italic">
                     "Analysis pending... Upload document to extract core scheme intelligence including SKU profitability impact and regional benefit spreads."
                   </p>
                 </div>
 
                 {/* Dummy Preview State */}
-                <div className="mt-8 space-y-6 opacity-30 select-none blur-[1px]">
+                <div className="mt-10 space-y-6 opacity-30 select-none blur-[1px]">
                   <div className="space-y-1">
                     <p className="text-xs text-slate-500 font-bold uppercase tracking-tighter">Scheme Details</p>
                     <p className="text-sm text-slate-200">Q3 Monsoon Multi-Tier Distribution Incentive</p>
@@ -193,7 +197,7 @@ export default function UploadSchemePage() {
             </div>
 
             {/* Action Button */}
-            <div className="mt-8">
+            <div className="mt-10">
               <button className="w-full bg-slate-100 text-slate-950 h-16 rounded-xl flex items-center justify-center gap-3 font-black text-lg shadow-xl shadow-blue-500/10 hover:bg-white active:scale-[0.98] transition-all">
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "FILL 1" }}>
                   send
@@ -210,14 +214,14 @@ export default function UploadSchemePage() {
 
       {/* Global Status Bar */}
       <div
-        className="mt-12 rounded-xl border border-slate-800/50 p-4 flex items-center justify-between px-8"
+        className="mt-16 rounded-xl border border-slate-800/50 p-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between px-8 lg:px-10"
         style={{
           background: "rgba(15, 23, 42, 0.6)",
           backdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255, 255, 255, 0.1)",
         }}
       >
-        <div className="flex items-center gap-8">
+        <div className="flex flex-wrap items-center gap-6 lg:gap-8">
           <div className="flex items-center gap-3">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className="text-xs font-mono-data text-slate-400">CORE SYSTEM: OPTIMAL</span>

@@ -27,7 +27,7 @@ export default function AuditTrailPanel() {
         if (data && data.events && data.events.length > 0) {
           setLiveEvents(data.events);
         }
-      }).catch(console.error);
+      }).catch(() => {});
     });
   }, []);
 

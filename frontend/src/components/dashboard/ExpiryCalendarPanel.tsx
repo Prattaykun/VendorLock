@@ -23,7 +23,7 @@ export default function ExpiryCalendarPanel({ onAction }: Props) {
         if (data && data.batches && data.batches.length > 0) {
           setLiveBatches(data.batches);
         }
-      }).catch(console.error);
+      }).catch(() => {});
     });
   }, []);
 

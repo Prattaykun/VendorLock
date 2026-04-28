@@ -127,7 +127,7 @@ export default function DistributorControlTower() {
           })));
         }
       } catch (err) {
-        console.warn("Backend unavailable, using mock data", err);
+        // Silently fail and use mock data
       } finally {
         setIsDataLoading(false);
       }
