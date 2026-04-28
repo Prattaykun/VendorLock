@@ -182,7 +182,7 @@ docker-compose up --build
 | Storage | AWS S3 |
 | Audit | SHA-256 hash chain |
 
---
+---
 
 ## 6 AI Agents
 
