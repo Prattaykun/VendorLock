@@ -27,78 +27,80 @@ export default function RootLandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full auto-rows-max">
-          <Link href="/distributor">
-            <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500 transition-all cursor-pointer group h-full w-full">
-              <CardHeader className="pb-8 pt-8 text-center px-6">
-                <div className="mb-8 text-blue-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <LayoutDashboard size={64} />
-                </div>
-                <CardTitle className="text-white text-xl md:text-2xl text-center">Distributor</CardTitle>
-                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Control Tower & Beat Intelligence</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+        <div className="flex justify-center w-full px-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 auto-rows-max w-full max-w-5xl">
+            <Link href="/distributor">
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-blue-500 transition-all cursor-pointer group h-full w-full">
+                <CardHeader className="pb-8 pt-8 text-center px-6">
+                  <div className="mb-8 text-blue-500 group-hover:scale-110 transition-transform flex justify-center">
+                    <LayoutDashboard size={64} />
+                  </div>
+                  <CardTitle className="text-white text-xl md:text-2xl text-center">Distributor</CardTitle>
+                  <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Control Tower & Beat Intelligence</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
 
-          <Link href="/company">
-            <Card className="bg-zinc-900 border-zinc-800 hover:border-purple-500 transition-all cursor-pointer group h-full w-full">
-              <CardHeader className="pb-8 pt-8 text-center px-6">
-                <div className="mb-8 text-purple-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Building2 size={64} />
-                </div>
-                <CardTitle className="text-white text-xl md:text-2xl text-center">Company</CardTitle>
-                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Policy Management & Oversight</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+            <Link href="/company">
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-purple-500 transition-all cursor-pointer group h-full w-full">
+                <CardHeader className="pb-8 pt-8 text-center px-6">
+                  <div className="mb-8 text-purple-500 group-hover:scale-110 transition-transform flex justify-center">
+                    <Building2 size={64} />
+                  </div>
+                  <CardTitle className="text-white text-xl md:text-2xl text-center">Company</CardTitle>
+                  <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Policy Management & Oversight</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
 
-          <Link href="/agent">
-            <Card className="bg-zinc-900 border-zinc-800 hover:border-green-500 transition-all cursor-pointer group h-full w-full">
-              <CardHeader className="pb-8 pt-8 text-center px-6">
-                <div className="mb-8 text-green-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Users size={64} />
-                </div>
-                <CardTitle className="text-white text-xl md:text-2xl text-center">Salesman</CardTitle>
-                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">On-field Intelligence & Execution</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+            <Link href="/agent">
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-green-500 transition-all cursor-pointer group h-full w-full">
+                <CardHeader className="pb-8 pt-8 text-center px-6">
+                  <div className="mb-8 text-green-500 group-hover:scale-110 transition-transform flex justify-center">
+                    <Users size={64} />
+                  </div>
+                  <CardTitle className="text-white text-xl md:text-2xl text-center">Salesman</CardTitle>
+                  <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">On-field Intelligence & Execution</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
 
-          <Link href="/nbfc">
-            <Card className="bg-zinc-900 border-zinc-800 hover:border-amber-500 transition-all cursor-pointer group h-full w-full">
-              <CardHeader className="pb-8 pt-8 text-center px-6">
-                <div className="mb-8 text-amber-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Landmark size={64} />
-                </div>
-                <CardTitle className="text-white text-xl md:text-2xl text-center">NBFC / Lender</CardTitle>
-                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Credit Risk, Collections & Portfolio View</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+            <Link href="/nbfc">
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-amber-500 transition-all cursor-pointer group h-full w-full">
+                <CardHeader className="pb-8 pt-8 text-center px-6">
+                  <div className="mb-8 text-amber-500 group-hover:scale-110 transition-transform flex justify-center">
+                    <Landmark size={64} />
+                  </div>
+                  <CardTitle className="text-white text-xl md:text-2xl text-center">NBFC / Lender</CardTitle>
+                  <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Credit Risk, Collections & Portfolio View</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
 
-          <Link href="/horeca">
-            <Card className="bg-zinc-900 border-zinc-800 hover:border-orange-500 transition-all cursor-pointer group h-full w-full">
-              <CardHeader className="pb-8 pt-8 text-center px-6">
-                <div className="mb-8 text-orange-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <UtensilsCrossed size={64} />
-                </div>
-                <CardTitle className="text-white text-xl md:text-2xl text-center">HORECA Buyer</CardTitle>
-                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Purchase Planning, Fill Rate & Supplier Insights</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+            <Link href="/horeca">
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-orange-500 transition-all cursor-pointer group h-full w-full">
+                <CardHeader className="pb-8 pt-8 text-center px-6">
+                  <div className="mb-8 text-orange-500 group-hover:scale-110 transition-transform flex justify-center">
+                    <UtensilsCrossed size={64} />
+                  </div>
+                  <CardTitle className="text-white text-xl md:text-2xl text-center">HORECA Buyer</CardTitle>
+                  <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Purchase Planning, Fill Rate & Supplier Insights</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
 
-          <Link href="/retailer">
-            <Card className="bg-zinc-900 border-zinc-800 hover:border-cyan-500 transition-all cursor-pointer group h-full w-full">
-              <CardHeader className="pb-8 pt-8 text-center px-6">
-                <div className="mb-8 text-cyan-500 group-hover:scale-110 transition-transform flex justify-center">
-                  <Store size={64} />
-                </div>
-                <CardTitle className="text-white text-xl md:text-2xl text-center">Retailer Dashboard</CardTitle>
-                <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Kirana Operations, Inventory Health & Reorder Signals</CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+            <Link href="/retailer">
+              <Card className="bg-zinc-900 border-zinc-800 hover:border-cyan-500 transition-all cursor-pointer group h-full w-full">
+                <CardHeader className="pb-8 pt-8 text-center px-6">
+                  <div className="mb-8 text-cyan-500 group-hover:scale-110 transition-transform flex justify-center">
+                    <Store size={64} />
+                  </div>
+                  <CardTitle className="text-white text-xl md:text-2xl text-center">Retailer Dashboard</CardTitle>
+                  <CardDescription className="text-zinc-400 text-base md:text-lg mt-3 text-center">Kirana Operations, Inventory Health & Reorder Signals</CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          </div>
         </div>
 
         <div className="pt-20 text-zinc-600 text-xs tracking-wide text-center w-full">
