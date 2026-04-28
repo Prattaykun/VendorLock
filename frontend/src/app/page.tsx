@@ -19,6 +19,13 @@ export default function RootLandingPage() {
       <div className="fixed inset-0 z-0 bg-black/70 pointer-events-none" />
       <div className="relative z-10 w-full mx-auto space-y-16 px-4 max-w-7xl">
         <div className="space-y-6 pb-12 text-center">
+          <div className="flex justify-center mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 bg-blue-500 flex items-center justify-center rounded-lg shadow-lg shadow-blue-500/30">
+                <img src="/logo-round.png" alt="VendorLock Logo" className="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
           <h1 className="text-7xl md:text-8xl font-black tracking-tighter bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
             VendorLock AI
           </h1>

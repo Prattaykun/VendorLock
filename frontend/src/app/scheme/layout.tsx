@@ -17,7 +17,6 @@ export default function SchemeLayout({ children }: { children: ReactNode }) {
           </div>
           <div>
             <h1 className="text-lg font-black text-blue-500 leading-none">VendorLock</h1>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Mission Control</p>
           </div>
         </div>
 
