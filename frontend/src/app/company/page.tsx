@@ -10,9 +10,14 @@ export default function CompanyPage() {
     <div className="min-h-screen bg-[#081425] text-[#d8e3fb]">
       {/* Header */}
       <header className="bg-slate-900/60 backdrop-blur-xl border-b border-slate-800 px-8 py-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-black text-[#d8e3fb] mb-2">Company Dashboard</h1>
-          <p className="text-slate-400">Manage your policy schemes and monitor distribution</p>
+        <div className="max-w-7xl mx-auto flex items-center gap-4">
+          <div className="w-12 h-12 bg-purple-600 flex items-center justify-center rounded-lg shadow-lg shadow-purple-600/30">
+            <img src="/logo-round.png" alt="VendorLock Logo" className="w-full h-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black text-[#d8e3fb]">Company Dashboard</h1>
+            <p className="text-slate-400">Manage your policy schemes and monitor distribution</p>
+          </div>
         </div>
       </header>
 
