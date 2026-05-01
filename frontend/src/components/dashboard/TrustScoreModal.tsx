@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X, RefreshCw, AlertCircle, TrendingUp, ShieldCheck } from "lucide-react";
+import { X, RefreshCw, AlertCircle, TrendingUp, ShieldCheck, Loader2 } from "lucide-react";
 import { getTrustBreakdown, getTrustHistory, recalculateScore } from "@/lib/api-client";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 

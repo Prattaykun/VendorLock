@@ -48,6 +48,7 @@ export function clearAuthToken() {
 
 // ── Base Fetcher ──────────────────────────────────────────────────────────────
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function apiFetch<T = any>(
   path: string,
   options: RequestInit = {}
@@ -98,9 +99,10 @@ async function apiFetch<T = any>(
     }
 
     return await res.json();
-  } catch (error: any) {
+  } catch (e: unknown) {
+    const error = e as Error;
     // Catch network errors (CORS, offline, etc)
-    if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+    if (error.message?.includes("Failed to fetch") || error.message?.includes("NetworkError")) {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("api-error", { detail: { message: "Network error. Please check your connection." } }));
       }
@@ -146,7 +148,7 @@ export async function getMe() {
 export async function logout() {
   try {
     await apiFetch("/auth/logout", { method: "POST" });
-  } catch (_) {
+  } catch {
     // Ignore errors — always clear client-side token
   } finally {
     clearAuthToken();
@@ -195,6 +197,7 @@ export interface CreateSalesmanPayload {
   telegram_chat_id?: number;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function listSalesmenDirect() {
   return apiFetch<{ salesmen: any[] }>("/salesman/");
 }
@@ -337,7 +340,7 @@ export async function listSchemes() {
   return apiFetch("/schemes/");
 }
 
-export async function createScheme(payload: any) {
+export async function createScheme(payload: Record<string, unknown>) {
   return apiFetch("/schemes/", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -386,7 +389,7 @@ export async function listBatches(params?: { sku_id?: string; expiring_within_da
 
 // ── Returns ───────────────────────────────────────────────────────────────────
 
-export async function submitReturn(payload: any) {
+export async function submitReturn(payload: Record<string, unknown>) {
   return apiFetch("/returns/", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -407,6 +410,10 @@ export async function rejectReturn(returnId: string, reason?: string) {
   return apiFetch(`/returns/${returnId}/reject${params}`, { method: "PATCH" });
 }
 
+export async function claimBrandReturn(batchId: string) {
+  return apiFetch(`/returns/claim/${batchId}`, { method: "POST" });
+}
+
 // ── Certificates ──────────────────────────────────────────────────────────────
 
 export async function generateCertificate(retailerId: string) {
@@ -418,6 +425,10 @@ export async function generateCertificate(retailerId: string) {
 
 export async function verifyCertificate(certificateId: string) {
   return apiFetch(`/certificate/verify/${certificateId}`);
+}
+
+export async function getCertificateHistory(retailerId: string) {
+  return apiFetch(`/certificate/history/${retailerId}`);
 }
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
@@ -446,7 +457,7 @@ export async function getRevenueHeatmap(periodDays = 30) {
   return apiFetch(`/analytics/revenue-heatmap?period_days=${periodDays}`);
 }
 
-export async function getQuickCommerceThreat(pincode?: string, skuId?: string) {
+export async function getQuickCommerceThreat(_pincode?: string, _skuId?: string) {
   // Coming Soon — Agent 5 QC price monitoring is not yet implemented
   return { threats: [], last_scan: null, status: "COMING_SOON" };
 }
@@ -472,7 +483,7 @@ export type AgentName =
   | "agent_5_demand_forecast"
   | "agent_6_beat_intelligence";
 
-export async function runAgent(agent: AgentName, inputPayload?: Record<string, any>) {
+export async function runAgent(agent: AgentName, inputPayload?: Record<string, unknown>) {
   return apiFetch("/agents/run", {
     method: "POST",
     body: JSON.stringify({ agent, input_payload: inputPayload }),
@@ -509,7 +520,7 @@ export async function getTelegramMessages(limit = 50) {
 export async function getDisputedCollections() {
   try {
     return await apiFetch("/orders/disputed-collections");
-  } catch (error) {
+  } catch {
     return [];
   }
 }

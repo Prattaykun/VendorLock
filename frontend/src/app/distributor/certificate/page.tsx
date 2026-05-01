@@ -46,7 +46,7 @@ export default function CertificatePage() {
     setGenerating(true);
     try {
       const { generateCertificate } = await import("@/lib/api-client");
-      const cert = await generateCertificate(selectedRetailer.id, "distributor");
+      const cert = await generateCertificate(selectedRetailer.id);
       setGeneratedCert(cert);
       toast.success("Certificate generated successfully");
       // Refresh history

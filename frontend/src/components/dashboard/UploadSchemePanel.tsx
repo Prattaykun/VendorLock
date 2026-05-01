@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import {
   Upload, FileText, Calendar, DollarSign, AlertCircle,
-  CheckCircle, X, Download, Eye, Trash2
+  CheckCircle, Download, Eye, Trash2
 } from "lucide-react";
 
 interface UploadedFile {
@@ -34,43 +34,6 @@ export default function UploadSchemePanel() {
   const [endDate, setEndDate] = useState("");
   const [budget, setBudget] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  }, []);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    
-    const files = Array.from(e.dataTransfer.files);
-    processFiles(files);
-  }, []);
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    processFiles(files);
-  };
-
-  const processFiles = (files: File[]) => {
-    const newFiles: UploadedFile[] = files.map((file) => ({
-      id: Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      progress: 0,
-      status: "uploading" as const,
-    }));
-
-    setUploadedFiles((prev) => [...prev, ...newFiles]);
-    simulateUpload(newFiles);
-  };
 
   const simulateUpload = (files: UploadedFile[]) => {
     setIsUploading(true);
@@ -98,6 +61,43 @@ export default function UploadSchemePanel() {
         }
       }, 200);
     });
+  };
+
+  const processFiles = (files: File[]) => {
+    const newFiles: UploadedFile[] = files.map((file) => ({
+      id: Math.random().toString(36).substr(2, 9),
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      progress: 0,
+      status: "uploading" as const,
+    }));
+
+    setUploadedFiles((prev) => [...prev, ...newFiles]);
+    simulateUpload(newFiles);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    processFiles(files);
   };
 
   const removeFile = (id: string) => {

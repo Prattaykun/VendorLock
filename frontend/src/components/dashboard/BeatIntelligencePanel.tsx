@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { coverageZones, ghostVisitAlerts, beatPlan as mockBeatPlan } from "@/lib/mock-data";
-import { listSalesmenDirect, getCoverageGaps, getGhostVisitReport, generateBeatPlansAll } from "@/lib/api-client";
+import { listSalesmenDirect, getCoverageGaps, getGhostVisitReport, generateBeatPlans } from "@/lib/api-client";
 import { formatInr } from "@/lib/helpers";
 import "leaflet/dist/leaflet.css";
 
@@ -203,7 +203,7 @@ export default function BeatIntelligencePanel() {
 
   const handleGeneratePlans = async () => {
     setGeneratingPlans(true);
-    try { await generateBeatPlansAll(); } catch {} finally { setGeneratingPlans(false); }
+    try { await generateBeatPlans(); } catch {} finally { setGeneratingPlans(false); }
   };
 
   const salesmen = liveSalesmen.map((sm) => ({
@@ -486,7 +486,8 @@ export default function BeatIntelligencePanel() {
           )}
 
           {/* Beat Plan Tab (existing map + table) */}
-          {activeTab === "beat" && <>}
+          {activeTab === "beat" && (
+            <>
           <motion.div {...fadeUp} transition={{ delay: 0.1 }} className="col-span-12">
             <div className="rounded-xl overflow-hidden relative" style={{ backgroundColor: COLORS.surface }}>
               <div className="absolute top-0 left-0 right-0 h-px" style={{ backgroundColor: `${COLORS.surfaceHighest}80` }} />
@@ -577,8 +578,8 @@ export default function BeatIntelligencePanel() {
               </Table>
             </div>
           </motion.div>
-          </>
-          }
+            </>
+          )}
         </div>
       </div>
     </section>
