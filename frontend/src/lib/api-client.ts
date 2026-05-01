@@ -285,6 +285,13 @@ export async function cancelOrder(orderId: string) {
   return apiFetch(`/orders/${orderId}/cancel`, { method: "PATCH" });
 }
 
+export async function blockAndNudgeOrder(orderId: string, message: string) {
+  return apiFetch(`/orders/${orderId}/nudge`, {
+    method: "POST",
+    body: JSON.stringify({ message }),
+  });
+}
+
 // ── Trust Scores ──────────────────────────────────────────────────────────────
 
 export async function getTrustScore(retailerId: string) {

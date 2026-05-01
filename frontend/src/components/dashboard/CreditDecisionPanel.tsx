@@ -2,7 +2,7 @@ import { useState, useMemo } from "react";
 import { formatInr } from "@/lib/helpers";
 import { ShieldCheck, AlertTriangle, ArrowRight, ShieldAlert, BadgeInfo } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { confirmOrder } from "@/lib/api-client";
+import { confirmOrder, blockAndNudgeOrder } from "@/lib/api-client";
 import { toast } from "sonner";
 
 export default function CreditDecisionPanel({ onAction, orders, alerts, retailers, updateOrderStatus }: any) {
@@ -29,7 +29,6 @@ export default function CreditDecisionPanel({ onAction, orders, alerts, retailer
   const handleBlockNudge = async (orderId: string, retailerName: string) => {
     setLoading(orderId);
     try {
-      const { blockAndNudgeOrder } = await import("@/lib/api-client");
       await blockAndNudgeOrder(orderId, `Hello ${retailerName}, your recent order has been blocked due to credit limit or payment issues. Please clear outstanding dues.`);
       updateOrderStatus && updateOrderStatus(orderId, "BLOCKED");
       toast.success(`Order ${orderId.split('-')[0]} Blocked and Nudge Sent`);
