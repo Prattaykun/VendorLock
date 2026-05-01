@@ -4,30 +4,46 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { schemes as mockSchemes, retailerSchemes } from "@/lib/mock-data";
 import { formatInr } from "@/lib/helpers";
-import { AlertTriangle, TrendingUp, Download, Calendar, ArrowRight, Eye, Gavel } from "lucide-react";
+import { AlertTriangle, TrendingUp, TrendingDown, Calendar, ArrowRight, Eye, Gavel, RefreshCw } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const fadeUp = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
 
 export default function SchemeLeakagePanel() {
+  const [leakageData, setLeakageData] = useState<any>(null);
   const [liveSchemes, setLiveSchemes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    import("@/lib/api-client").then(({ listSchemes }) => {
-      listSchemes().then((data) => {
-        if (data && data.schemes && data.schemes.length > 0) {
-          setLiveSchemes(data.schemes);
-        }
-      }).catch(() => {});
-    });
+    const fetchAll = async () => {
+      setLoading(true);
+      try {
+        const [{ getSchemeLeakage }, { listSchemes }] = await Promise.all([
+          import("@/lib/api-client"),
+          import("@/lib/api-client"),
+        ]);
+        const [leakage, schemes] = await Promise.all([
+          getSchemeLeakage(30).catch(() => null),
+          listSchemes().catch(() => null),
+        ]);
+        setLeakageData(leakage);
+        setLiveSchemes(schemes?.schemes || []);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
   }, []);
 
-  const displaySchemes = liveSchemes.length > 0 ? liveSchemes : mockSchemes;
-  const totalLeakage = displaySchemes.reduce((sum, s) => sum + (s.leakage || 0), 0);
+  const totalLeakage = leakageData?.total_leakage || 0;
+  const leakageReports = leakageData?.leakage_reports || [];
+
+  const chartData = leakageReports.map((r: any) => ({
+    name: r.scheme_name?.length > 20 ? r.scheme_name.slice(0, 20) + "…" : r.scheme_name,
+    leakage: r.leakage_rupee,
+  }));
 
   return (
     <section className="space-y-6">
@@ -76,114 +92,66 @@ export default function SchemeLeakagePanel() {
           </div>
           <div className="mt-8 border-t border-slate-800/30 pt-4 flex justify-between font-mono text-xs text-slate-500">
             <div className="flex flex-col">
-              <span>Total Schemes Val</span>
-              <span className="text-white">₹38.5L</span>
+              <span>Schemes Affected</span>
+              <span className="text-white">{leakageData?.scheme_count ?? "—"}</span>
             </div>
             <div className="flex flex-col text-right">
-              <span>Avg Leakage Rate</span>
-              <span className="text-rose-400">11.1%</span>
+              <span>Period</span>
+              <span className="text-slate-300">MTD (30D)</span>
             </div>
           </div>
         </motion.div>
 
-        {/* Top Right: Active Schemes List */}
+        {/* Active Schemes Table */}
         <motion.div {...fadeUp} transition={{ delay: 0.2 }} className="col-span-12 lg:col-span-8 bg-slate-900/60 border border-slate-800 rounded-xl p-6 relative">
           <div className="absolute top-0 left-0 w-full h-[1px] bg-white/10" />
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-base font-semibold text-slate-200">Active Schemes Monitored</h3>
-            <button className="text-blue-400 hover:text-blue-300 font-label-md text-label-md flex items-center gap-1">
-              View All <ArrowRight className="w-4 h-4" />
-            </button>
+            <span className="text-xs text-slate-500">{liveSchemes.length} schemes</span>
           </div>
           <div className="overflow-x-auto">
             <Table className="w-full text-left border-collapse">
               <TableHeader>
                 <TableRow className="border-b border-slate-800/50 font-label-md text-label-md text-slate-500">
-                  <TableHead className="pb-3 pl-2">Brand / SKU</TableHead>
-                  <TableHead className="pb-3">Scheme Target</TableHead>
-                  <TableHead className="pb-3">Distribution Split</TableHead>
+                  <TableHead className="pb-3 pl-2">Brand / Scheme</TableHead>
+                  <TableHead className="pb-3">Discount</TableHead>
+                  <TableHead className="pb-3">Valid Until</TableHead>
                   <TableHead className="pb-3 text-right pr-2">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="font-body-sm text-body-sm">
-                <TableRow className="border-b border-slate-800/20 hover:bg-slate-800/30 transition-colors">
-                  <TableCell className="py-4 pl-2">
-                    <div className="flex flex-col">
-                      <span className="text-slate-200 font-medium">VitaGlow Plus</span>
-                      <span className="text-xs text-slate-500">SKU: VG-500ML-B</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-slate-800 px-2 py-1 rounded border border-slate-700 font-mono">15% Extra</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="text-blue-400">Dist: 5%</span>
-                      <span className="text-slate-500">|</span>
-                      <span className="text-slate-300">Ret: 10%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4 text-right pr-2">
-                    <span className="inline-flex items-center gap-1 bg-rose-500/10 text-rose-400 px-2.5 py-1 rounded-full text-xs font-medium border border-rose-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
-                      High Alert
-                    </span>
-                  </TableCell>
-                </TableRow>
-                <TableRow className="border-b border-slate-800/20 hover:bg-slate-800/30 transition-colors">
-                  <TableCell className="py-4 pl-2">
-                    <div className="flex flex-col">
-                      <span className="text-slate-200 font-medium">CleanSweep Pro</span>
-                      <span className="text-xs text-slate-500">SKU: CS-1KG-P</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-slate-800 px-2 py-1 rounded border border-slate-700 font-mono">Buy 2 Get 1</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="text-blue-400">Dist: 0%</span>
-                      <span className="text-slate-500">|</span>
-                      <span className="text-slate-300">Ret: 100%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4 text-right pr-2">
-                    <span className="inline-flex items-center gap-1 bg-blue-500/10 text-blue-400 px-2.5 py-1 rounded-full text-xs font-medium border border-blue-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
-                      Stable
-                    </span>
-                  </TableCell>
-                </TableRow>
-                <TableRow className="hover:bg-slate-800/30 transition-colors">
-                  <TableCell className="py-4 pl-2">
-                    <div className="flex flex-col">
-                      <span className="text-slate-200 font-medium">NutriCrunch Oats</span>
-                      <span className="text-xs text-slate-500">SKU: NC-500G-BOX</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-slate-800 px-2 py-1 rounded border border-slate-700 font-mono">₹50 Off SRP</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4">
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="text-blue-400">Dist: 20%</span>
-                      <span className="text-slate-500">|</span>
-                      <span className="text-slate-300">Ret: 80%</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-4 text-right pr-2">
-                    <span className="inline-flex items-center gap-1 bg-rose-500/10 text-rose-400 px-2.5 py-1 rounded-full text-xs font-medium border border-rose-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-400 animate-pulse"></span>
-                      Investigating
-                    </span>
-                  </TableCell>
-                </TableRow>
+                {liveSchemes.length === 0 && !loading && (
+                  <TableRow><TableCell colSpan={4} className="text-center text-slate-500 py-8">No active schemes. Create one in the Schemes tab.</TableCell></TableRow>
+                )}
+                {liveSchemes.map((s: any) => {
+                  const isExpired = new Date(s.valid_to) < new Date();
+                  return (
+                    <TableRow key={s.id} className="border-b border-slate-800/20 hover:bg-slate-800/30 transition-colors">
+                      <TableCell className="py-4 pl-2">
+                        <div className="flex flex-col">
+                          <span className="text-slate-200 font-medium">{s.scheme_name}</span>
+                          <span className="text-xs text-slate-500">{s.brand}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <span className="bg-slate-800 px-2 py-1 rounded border border-slate-700 font-mono text-xs">{s.discount_percent}% Off</span>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <span className="text-xs text-slate-400">{s.valid_to ? new Date(s.valid_to).toLocaleDateString("en-IN") : "—"}</span>
+                      </TableCell>
+                      <TableCell className="py-4 text-right pr-2">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${
+                          isExpired
+                            ? "bg-slate-700/20 text-slate-400 border-slate-600/20"
+                            : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${isExpired ? "bg-slate-500" : "bg-emerald-400 animate-pulse"}`} />
+                          {isExpired ? "Expired" : "Active"}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -193,58 +161,30 @@ export default function SchemeLeakagePanel() {
         <motion.div {...fadeUp} transition={{ delay: 0.3 }} className="col-span-12 lg:col-span-6 bg-slate-900/60 border border-slate-800 rounded-xl p-6 relative">
           <div className="absolute top-0 left-0 w-full h-[1px] bg-white/10" />
           <h3 className="text-base font-semibold text-slate-200 mb-6">Leakage by Scheme</h3>
-          <div className="flex flex-col gap-6">
-            {/* Scheme 1 */}
-            <div>
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-sm text-slate-200">VitaGlow 15% Extra</span>
-                <div className="flex flex-col items-end">
-                  <span className="font-mono text-sm text-rose-400">₹1.8L Lost</span>
-                  <span className="text-[10px] text-slate-500">Passed: 65% / Received: 42%</span>
-                </div>
-              </div>
-              <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden flex border border-slate-700/30">
-                <div className="h-full bg-blue-500/40 w-[65%] border-r border-slate-900"></div>
-                <div className="h-full bg-rose-500 w-[23%] relative">
-                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMyI+PC9zdmc+')] opacity-50"></div>
-                </div>
-              </div>
+          {loading ? (
+            <div className="flex items-center justify-center h-48 text-slate-500"><RefreshCw className="w-5 h-5 animate-spin mr-2" /> Loading...</div>
+          ) : leakageReports.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-48 text-slate-500 border border-slate-800 border-dashed rounded-xl">
+              <p className="text-sm">No scheme leakage detected.</p>
+              <p className="text-xs mt-1 text-slate-600">Agent 3 will flag leakage automatically when it detects discrepancies.</p>
             </div>
-            {/* Scheme 2 */}
-            <div>
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-sm text-slate-200">NutriCrunch ₹50 Off</span>
-                <div className="flex flex-col items-end">
-                  <span className="font-mono text-sm text-rose-400">₹1.2L Lost</span>
-                  <span className="text-[10px] text-slate-500">Passed: 90% / Received: 75%</span>
-                </div>
-              </div>
-              <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden flex border border-slate-700/30">
-                <div className="h-full bg-blue-500/40 w-[90%] border-r border-slate-900"></div>
-                <div className="h-full bg-rose-500 w-[15%] relative">
-                  <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjZmZmIiBmaWxsLW9wYWNpdHk9IjAuMyI+PC9zdmc+')] opacity-50"></div>
-                </div>
-              </div>
+          ) : (
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 20 }}>
+                  <XAxis type="number" stroke="#475569" fontSize={10} tickFormatter={(v) => `₹${(v/1000).toFixed(0)}k`} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="name" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} width={110} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: "#0f172a", border: "1px solid #1e293b", borderRadius: "8px" }}
+                    formatter={(val: any) => [`₹${formatInr(val)}`, "Leakage"]}
+                  />
+                  <Bar dataKey="leakage" radius={[0, 6, 6, 0]}>
+                    {chartData.map((_: any, i: number) => <Cell key={i} fill={i === 0 ? "#f43f5e" : i === 1 ? "#f97316" : "#eab308"} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            {/* Scheme 3 */}
-            <div>
-              <div className="flex justify-between items-end mb-2">
-                <span className="text-sm text-slate-200">CleanSweep Buy 2 Get 1</span>
-                <div className="flex flex-col items-end">
-                  <span className="font-mono text-sm text-slate-400">₹0.1L Lost</span>
-                  <span className="text-[10px] text-slate-500">Passed: 95% / Received: 93%</span>
-                </div>
-              </div>
-              <div className="h-3 w-full bg-slate-800 rounded-full overflow-hidden flex border border-slate-700/30">
-                <div className="h-full bg-blue-500/40 w-[95%] border-r border-slate-900"></div>
-                <div className="h-full bg-slate-400 w-[2%]"></div>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 mt-2 font-label-md text-label-md text-xs text-slate-500 justify-center">
-              <div className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500/40 rounded-sm"></span> Claimed Passed</div>
-              <div className="flex items-center gap-1"><span className="w-3 h-3 bg-rose-500 rounded-sm"></span> Leakage Gap</div>
-            </div>
-          </div>
+          )}
         </motion.div>
 
         {/* Bottom Right: Retailer Drill-down Table */}

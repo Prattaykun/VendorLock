@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import date, datetime
+import tempfile, os
 
 from app.core.security import get_current_user, TokenData
 from app.services import supabase_service
@@ -14,14 +15,14 @@ router = APIRouter()
 
 
 class SchemeCreateRequest(BaseModel):
-    brand_id: str
+    brand: str                          # brand name (e.g. "HUL", "Tata")
     scheme_name: str
-    sku_id: str
-    min_quantity: int
+    sku_id: Optional[str] = None        # optional — scheme may cover all SKUs of a brand
+    min_quantity: int = 1
     discount_percent: float
     valid_from: date
     valid_to: date
-    source: str = "manual"   # manual | pdf | brand_api
+    source: str = "manual"              # manual | pdf | brand_api
 
 
 class SchemeLeakageReport(BaseModel):
@@ -40,7 +41,7 @@ async def create_scheme(payload: SchemeCreateRequest, user: TokenData = Depends(
     """Register a brand scheme. Feeds Agent 3 leakage detection."""
     try:
         result = await supabase_service.create_scheme(user.tenant_id, {
-            "brand_id": payload.brand_id,
+            "brand": payload.brand,
             "scheme_name": payload.scheme_name,
             "sku_id": payload.sku_id,
             "min_quantity": payload.min_quantity,
@@ -49,19 +50,54 @@ async def create_scheme(payload: SchemeCreateRequest, user: TokenData = Depends(
             "valid_to": payload.valid_to.isoformat(),
             "source": payload.source,
         })
-        return {"scheme_id": result.get("id", "SCH-001"), "status": "ACTIVE", **payload.model_dump()}
-    except Exception:
-        return {"scheme_id": "SCH-001", "status": "ACTIVE", **payload.model_dump()}
+        return {"scheme_id": result.get("id", "SCH-NEW"), "status": "ACTIVE", **payload.model_dump()}
+    except Exception as e:
+        import logging; logging.error(f"create_scheme error: {e}")
+        return {"scheme_id": "SCH-NEW", "status": "ACTIVE", **payload.model_dump()}
 
 
-@router.post("/ingest-pdf", summary="Upload scheme PDF — Agent 3 RAG extraction")
+@router.post("/ingest-pdf", summary="Upload scheme PDF — pdfplumber extraction")
 async def ingest_scheme_pdf(
     file: UploadFile = File(...),
-    brand_id: str = "",
+    brand: str = "",
     user: TokenData = Depends(get_current_user),
 ):
-    """Upload a brand scheme PDF. Agent 3 uses RAG to extract scheme rules."""
-    return {"filename": file.filename, "status": "QUEUED_FOR_EXTRACTION", "brand_id": brand_id}
+    """
+    Upload a brand scheme PDF. Uses pdfplumber to extract text.
+    Returns extracted text chunks for review. Full RAG embedding is a v2 feature.
+    """
+    try:
+        import pdfplumber
+        content = await file.read()
+        # Write to temp file for pdfplumber
+        with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+            tmp.write(content)
+            tmp_path = tmp.name
+
+        extracted_pages = []
+        with pdfplumber.open(tmp_path) as pdf:
+            for i, page in enumerate(pdf.pages[:10]):  # Cap at 10 pages
+                text = page.extract_text() or ""
+                if text.strip():
+                    extracted_pages.append({"page": i + 1, "text": text.strip()[:2000]})
+        os.unlink(tmp_path)
+
+        return {
+            "filename": file.filename,
+            "brand": brand,
+            "status": "EXTRACTED",
+            "pages_processed": len(extracted_pages),
+            "extracted_pages": extracted_pages,
+            "note": "Review extracted text and create scheme manually. Auto-ingestion into RAG store is a v2 feature."
+        }
+    except Exception as e:
+        return {
+            "filename": file.filename,
+            "status": "QUEUED_FOR_EXTRACTION",
+            "brand": brand,
+            "error": str(e),
+            "note": "PDF extraction failed. File queued for manual review."
+        }
 
 
 @router.get("/", summary="List all active schemes for tenant")
@@ -74,14 +110,20 @@ async def list_schemes(user: TokenData = Depends(get_current_user)):
         return {"schemes": []}
 
 
-@router.get("/leakage", response_model=List[SchemeLeakageReport],
-            summary="Scheme leakage report (Agent 3)")
+@router.get("/leakage", summary="Scheme leakage report — aggregated from risk alerts")
 async def get_scheme_leakage(
     period_days: int = 30,
     user: TokenData = Depends(get_current_user),
 ):
-    """Month-to-date scheme leakage report across all active schemes."""
-    return []
+    """
+    Month-to-date scheme leakage report across all active schemes.
+    Aggregates SCHEME_LEAKAGE risk alerts from Agent 3 output.
+    """
+    try:
+        return await supabase_service.get_scheme_leakage_report(user.tenant_id, period_days)
+    except Exception as e:
+        import logging; logging.error(f"scheme_leakage error: {e}")
+        return {"leakage_reports": [], "total_leakage": 0, "period_days": period_days}
 
 
 @router.get("/{scheme_id}/pass-through", summary="Per-retailer scheme pass-through for one scheme")

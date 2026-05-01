@@ -146,3 +146,47 @@ async def cancel_order(order_id: str, user: TokenData = Depends(get_current_user
     except Exception:
         pass
     return {"order_id": order_id, "status": "CANCELLED"}
+
+
+class NudgeRequest(BaseModel):
+    message: str
+
+
+@router.post("/{order_id}/nudge", summary="Block order and send nudge via Telegram")
+async def block_and_nudge_order(order_id: str, payload: NudgeRequest, user: TokenData = Depends(get_current_user)):
+    """
+    Blocks (disputes) an order and sends a collection nudge to the retailer via Telegram.
+    """
+    try:
+        # Update order status to BLOCKED/DISPUTED
+        await supabase_service.update_order_status(order_id, user.tenant_id, "BLOCKED")
+        
+        # Get order to find retailer_id
+        order = await supabase_service.get_order(order_id, user.tenant_id)
+        if order and order.get("retailer_id"):
+            retailer_id = order["retailer_id"]
+            
+            # Find Telegram chat ID for retailer
+            sb = supabase_service.get_supabase()
+            retailer_res = sb.table("retailers").select("telegram_chat_id").eq("id", retailer_id).execute()
+            
+            if retailer_res.data and retailer_res.data[0].get("telegram_chat_id"):
+                chat_id = retailer_res.data[0]["telegram_chat_id"]
+                
+                # Send Telegram message
+                from app.core.config import settings
+                import httpx
+                
+                if settings.TELEGRAM_BOT_TOKEN:
+                    url = f"https://api.telegram.org/bot{settings.TELEGRAM_BOT_TOKEN}/sendMessage"
+                    async with httpx.AsyncClient() as client:
+                        await client.post(url, json={
+                            "chat_id": chat_id,
+                            "text": payload.message
+                        })
+                        
+        return {"order_id": order_id, "status": "BLOCKED", "nudge_sent": True}
+    except Exception as e:
+        import logging
+        logging.error(f"Failed to nudge order {order_id}: {e}")
+        return {"order_id": order_id, "status": "BLOCKED", "nudge_sent": False, "error": str(e)}

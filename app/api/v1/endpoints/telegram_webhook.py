@@ -46,11 +46,22 @@ async def telegram_webhook(
 
         logger.info(f"[TG] Message from chat {chat_id}: {text[:80]}")
 
+        # Resolve tenant
+        tenant_id = await supabase_service.resolve_tenant_from_chat(chat_id)
+
         # Handle MYSCORE command
         if text.strip().upper() in ("MYSCORE", "MY SCORE", "MERA SCORE"):
-            # Return trust score for this retailer
             logger.info(f"[TG] MYSCORE command from {chat_id}")
-            # In production: look up retailer by chat_id and return score
+            sb = supabase_service.get_supabase()
+            ret_res = sb.table("retailers").select("id").eq("telegram_chat_id", chat_id).execute()
+            if ret_res.data:
+                retailer_id = ret_res.data[0]["id"]
+                score_data = await supabase_service.get_trust_score(retailer_id)
+                if score_data:
+                    score = score_data.get("composite_score", 50)
+                    tier = score_data.get("tier", "C")
+                    # In production: send message back via httpx
+                    logger.info(f"[TG] Sent score {score} ({tier}) to retailer {retailer_id}")
             return {"ok": True, "update_id": update_id, "handled": "MYSCORE"}
             
         # Handle /start command (Deep linking)
@@ -64,6 +75,9 @@ async def telegram_webhook(
                     logger.info(f"[TG] Linked chat {chat_id} to retailer {retailer_id}")
                 except Exception as e:
                     logger.error(f"[TG] Error linking retailer: {e}")
+            else:
+                logger.info(f"[TG] Unlinked user started bot: {chat_id}. Prompting for ID.")
+                # Send prompt to user asking for GSTIN or Mobile number
             return {"ok": True, "update_id": update_id, "handled": "START"}
 
         # Route to Agent 1 for intent parsing
@@ -72,7 +86,7 @@ async def telegram_webhook(
                 state = {
                     "raw_message": text,
                     "sender_id": str(chat_id),
-                    "tenant_id": "default",  # In production: map chat_id to tenant
+                    "tenant_id": tenant_id,
                     "channel": "telegram",
                     "language_hint": "auto",
                     "parsed_event": None,
@@ -96,10 +110,12 @@ async def telegram_webhook(
         chat_id = callback["message"]["chat"]["id"]
         logger.info(f"[TG] Callback from chat {chat_id}: {data}")
 
+        tenant_id = await supabase_service.resolve_tenant_from_chat(chat_id)
+
         if data.startswith("CONFIRM:"):
             order_id = data.split(":")[1]
             try:
-                await supabase_service.update_order_status(order_id, "default", "CONFIRMED")
+                await supabase_service.update_order_status(order_id, tenant_id, "CONFIRMED")
                 logger.info(f"Order {order_id} confirmed via Telegram")
             except Exception as e:
                 logger.error(f"Order confirmation failed: {e}")
@@ -107,7 +123,7 @@ async def telegram_webhook(
         elif data.startswith("DISPUTE:"):
             order_id = data.split(":")[1]
             try:
-                await supabase_service.update_order_status(order_id, "default", "DISPUTED")
+                await supabase_service.update_order_status(order_id, tenant_id, "DISPUTED")
                 logger.info(f"Order {order_id} disputed via Telegram")
             except Exception as e:
                 logger.error(f"Order dispute failed: {e}")

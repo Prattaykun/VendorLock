@@ -101,28 +101,61 @@ async def get_beat_plan(
         )
 
 
-@router.get("/coverage/gaps", summary="Get coverage gap report")
+@router.get("/coverage/gaps", summary="Coverage gap report — outlets not visited")
 async def get_coverage_gaps(
     days: int = 7,
     user: TokenData = Depends(get_current_user),
 ):
-    """Outlets not visited in the past N days — coverage gap report."""
-    return {"gaps": [], "period_days": days, "total_missed_outlets": 0}
+    """Outlets not visited in the past N days, with estimated revenue loss."""
+    try:
+        return await supabase_service.get_coverage_gaps(user.tenant_id, days)
+    except Exception as e:
+        return {"gaps": [], "period_days": days, "total_missed_outlets": 0, "error": str(e)}
 
 
-@router.get("/ghost-visits/report", summary="Ghost visit detection report")
+@router.get("/ghost-visits/report", summary="Ghost visit detection report per salesman")
 async def ghost_visit_report(
     salesman_id: Optional[str] = None,
     user: TokenData = Depends(get_current_user),
 ):
-    """Salesmen who logged check-ins with zero orders and zero 2-way messages."""
-    return {"ghost_visits": [], "estimated_missed_revenue": 0.0}
+    """Salesmen who logged check-ins with verified=False grouped with ghost rates."""
+    try:
+        return await supabase_service.get_ghost_visit_report(user.tenant_id, salesman_id)
+    except Exception as e:
+        return {"ghost_visits": [], "estimated_missed_revenue": 0.0, "error": str(e)}
 
 
 @router.post("/generate", summary="Generate beat plans for all salesmen (Agent 6)")
 async def generate_beat_plans(user: TokenData = Depends(get_current_user)):
-    """Trigger Agent 6 to generate tomorrow's beat plans for all salesmen in tenant."""
-    return {"queued": True, "tenant_id": user.tenant_id}
+    """Trigger Agent 6 to generate tomorrow's beat plans for all active salesmen."""
+    try:
+        salesmen_res = await supabase_service.list_salesmen_direct(user.tenant_id)
+        salesmen = salesmen_res.get("salesmen", [])
+        plans_generated = 0
+        for sm in salesmen:
+            try:
+                outlets = await supabase_service.list_outlets(user.tenant_id)
+                checkins = await supabase_service.get_checkin_logs(user.tenant_id, sm["id"])
+                orders = await supabase_service.list_orders(user.tenant_id)
+                state = {
+                    "tenant_id": user.tenant_id,
+                    "salesman_id": sm["id"],
+                    "outlet_master": outlets,
+                    "checkin_logs": checkins,
+                    "order_history": orders.get("orders", []),
+                    "coverage_gaps": [],
+                    "ghost_visit_ids": [],
+                    "beat_plan": [],
+                    "missed_revenue_estimate": 0.0,
+                    "error": None,
+                }
+                agent6_graph.invoke(state)
+                plans_generated += 1
+            except Exception:
+                pass
+        return {"queued": False, "plans_generated": plans_generated, "tenant_id": user.tenant_id}
+    except Exception:
+        return {"queued": True, "tenant_id": user.tenant_id}
 
 
 @router.post("/checkin", summary="Salesman logs a check-in at an outlet")

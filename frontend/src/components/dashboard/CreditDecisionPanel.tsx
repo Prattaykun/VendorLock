@@ -1,274 +1,182 @@
-"use client";
-
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Badge } from "@/components/ui/badge";
+import { useState, useMemo } from "react";
+import { formatInr } from "@/lib/helpers";
+import { ShieldCheck, AlertTriangle, ArrowRight, ShieldAlert, BadgeInfo } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { creditOrders as mockCreditOrders, velocityAlerts as mockVelocityAlerts } from "@/lib/mock-data";
-import { formatInr, verdictClass, scoreColor } from "@/lib/helpers";
-import { AlertTriangle, TrendingUp, FileCheck, Ban, Edit, Send, Check, ShieldCheck, Gavel, Filter, ArrowRight } from "lucide-react";
-import type { Order, Alert, Retailer } from "@/types/dashboard";
+import { confirmOrder } from "@/lib/api-client";
+import { toast } from "sonner";
 
-interface Props { 
-  onAction: (msg: string) => void;
-  orders?: any[];
-  alerts?: any[];
-  retailers?: any[];
-}
+export default function CreditDecisionPanel({ onAction, orders, alerts, retailers, updateOrderStatus }: any) {
+  const [loading, setLoading] = useState<string | null>(null);
+  
+  const pendingOrders = useMemo(() => {
+    return (orders || []).filter((o: any) => o.status === "PENDING_CONFIRMATION" || o.status === "BLOCKED");
+  }, [orders]);
 
-const fadeUp = { initial: { opacity: 0, y: 14 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.3 } };
+  const handleApprove = async (orderId: string) => {
+    setLoading(orderId);
+    try {
+      await confirmOrder(orderId);
+      updateOrderStatus && updateOrderStatus(orderId, "CONFIRMED");
+      toast.success(`Order ${orderId.split('-')[0]} Approved`);
+      onAction(`Approved order ${orderId}`);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to approve order");
+    } finally {
+      setLoading(null);
+    }
+  };
 
-export default function CreditDecisionPanel({ onAction, orders = [], alerts = [], retailers = [] }: Props) {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editMsg, setEditMsg] = useState("");
-
-  // Map live orders to creditOrders format, fallback to mock if no live orders need confirmation
-  const liveCreditOrders = orders
-    .filter(o => o.status === "PENDING_CONFIRMATION" || o.status === "BLOCKED")
-    .map(o => {
-      const retailer = retailers.find(r => r.id === o.retailerId) || { trustScore: 50, outstanding: 10000, creditLimit: 50000 };
-      const out = retailer.outstanding || 0;
-      const limit = retailer.creditLimit || 50000;
-      const val = o.orderValue || 0;
-      
-      let verdict = "APPROVE";
-      if (out + val > limit) verdict = "BLOCK";
-      else if (retailer.trustScore < 60) verdict = "CONDITIONAL";
-
-      return {
-        id: o.id,
-        retailerName: o.retailerName,
-        retailerTrustScore: retailer.trustScore,
-        orderValue: val,
-        items: [`${o.itemCount} SKUs (Live)`],
-        currentOutstanding: out,
-        postOrderOutstanding: out + val,
-        verdict,
-        draftMessage: `Auto-generated draft for ${o.id}`,
-        utilisationPercent: Math.round((out / limit) * 100) || 0
-      };
-    });
-
-  const displayCreditOrders = liveCreditOrders.length > 0 ? liveCreditOrders : mockCreditOrders;
-
-  // Map live alerts to velocity alerts format
-  const liveVelocityAlerts = alerts
-    .filter(a => a.title?.toLowerCase().includes("utilization") || a.title?.toLowerCase().includes("credit"))
-    .map(a => ({
-      retailerId: a.id,
-      retailerName: a.title,
-      utilisationJump: 25,
-      currentUtilisation: 90
-    }));
-
-  const displayVelocityAlerts = liveVelocityAlerts.length > 0 ? liveVelocityAlerts : mockVelocityAlerts;
+  const handleBlockNudge = async (orderId: string, retailerName: string) => {
+    setLoading(orderId);
+    try {
+      const { blockAndNudgeOrder } = await import("@/lib/api-client");
+      await blockAndNudgeOrder(orderId, `Hello ${retailerName}, your recent order has been blocked due to credit limit or payment issues. Please clear outstanding dues.`);
+      updateOrderStatus && updateOrderStatus(orderId, "BLOCKED");
+      toast.success(`Order ${orderId.split('-')[0]} Blocked and Nudge Sent`);
+      onAction(`Blocked and Nudged order ${orderId}`);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to block order");
+    } finally {
+      setLoading(null);
+    }
+  };
 
   return (
-    <section className="mt-6 p-6 w-full max-w-[1400px] mx-auto flex flex-col gap-6">
-      {/* Header Section */}
-      <motion.div {...fadeUp} className="flex justify-between items-end pb-2 border-b border-slate-800">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-white">VendorLock Decisions</h1>
-          <p className="text-sm text-slate-400 flex items-center gap-2 mt-1">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-400"></span>
-            </span>
-            Human-in-the-loop workflow active. 14 pending queue.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Button variant="outline" className="bg-slate-900 border border-slate-700 px-4 py-2 rounded text-sm text-slate-300 hover:text-white hover:border-slate-500 flex items-center gap-2">
-            <Filter className="w-[18px] h-[18px]" />
-            Filter Queue
-          </Button>
-        </div>
-      </motion.div>
+    <div className="p-6 bg-[#0f172a] min-h-full w-full max-w-[1200px] mx-auto text-slate-200">
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+          <ShieldAlert className="w-6 h-6 text-indigo-400" /> AI Credit Decision Engine
+        </h2>
+        <p className="text-sm text-slate-400 mt-1">Review orders held by Agent 1 due to credit limit breaches or low trust scores.</p>
+      </div>
 
-      {/* Credit Velocity Alert Banner */}
-      {displayVelocityAlerts.length > 0 && (
-        <motion.div {...fadeUp} transition={{ delay: 0.1 }}>
-          <div className="bg-rose-500/10 border border-rose-500/30 rounded-lg p-4 flex items-start gap-4 shadow-[0_0_15px_rgba(255,180,171,0.05)] backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-rose-500/50 to-transparent"></div>
-            <div className="bg-rose-500/10 p-2 rounded-full text-rose-400 mt-0.5">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-base font-semibold text-rose-400 mb-1">Credit Velocity Alert</h3>
-              <p className="text-sm text-rose-300/80">
-                Anomaly detected: &gt;30% spike in aggregate credit requests over the last 4 hours across North Sector. Recommend strict adherence to Trust Score thresholds.
-              </p>
-            </div>
-                <button className="text-rose-400/70 hover:text-rose-300 transition-colors">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Bento Grid Layout */}
-      <div className="grid grid-cols-12 gap-6 h-[calc(100vh-220px)] min-h-[640px]">
-        {/* Left Pane: Queue (8 cols) */}
-        <div className="col-span-8 flex flex-col gap-4 min-w-0">
-          {/* Queue Headers */}
-          <div className="grid grid-cols-12 gap-6 px-5 pb-3 text-xs font-medium text-slate-500 uppercase tracking-wider border-b border-slate-800">
-            <div className="col-span-3">Vendor / Order</div>
-            <div className="col-span-2 text-right">Items / Value</div>
-            <div className="col-span-2 text-center">Trust Score</div>
-            <div className="col-span-3 text-right">Exposure (Pre/Post)</div>
-            <div className="col-span-2 text-center">Verdict</div>
-          </div>
-
-          {/* Queue List (Scrollable) */}
-          <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-4">
-            {displayCreditOrders.map((co, i) => (
-              <motion.div
-                key={co.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className={`grid grid-cols-12 gap-6 items-center bg-slate-900/80 border rounded-lg p-5 cursor-pointer relative shadow-[0_0_20px_rgba(173,198,255,0.05)] ${
-                  co.verdict === "BLOCK" ? "border-rose-500/50 ring-1 ring-rose-500/20" :
-                  co.verdict === "CONDITIONAL" ? "border-amber-500/50" :
-                  "border-slate-800 hover:bg-slate-800/50"
-                }`}
-              >
-                {co.verdict === "BLOCK" && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-rose-500 rounded-r-full"></div>
-                )}
-                <div className="col-span-3 flex flex-col py-1">
-                  <span className="text-sm font-semibold text-white truncate">{co.retailerName}</span>
-                  <span className="font-mono text-xs text-slate-500 mt-1.5">{co.id}</span>
-                </div>
-                <div className="col-span-2 flex flex-col items-end py-1">
-                  <span className="font-mono text-sm text-white">{formatInr(co.orderValue)}</span>
-                  <span className="font-mono text-xs text-slate-400 mt-1.5">{co.items.length} SKUs</span>
-                </div>
-                <div className="col-span-2 flex justify-center py-1">
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-                    co.retailerTrustScore >= 80 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                    co.retailerTrustScore >= 50 ? "bg-amber-500/10 text-amber-400 border border-amber-500/20" :
-                    "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                  }`}>
-                    <span className={`w-2 h-2 rounded-full ${
-                      co.retailerTrustScore >= 80 ? "bg-emerald-400" :
-                      co.retailerTrustScore >= 50 ? "bg-amber-400" :
-                      "bg-rose-400"
-                    }`}></span>
-                    {co.retailerTrustScore}/100
-                  </div>
-                </div>
-                <div className="col-span-3 flex flex-col items-end py-1">
-                  <span className="font-mono text-xs text-slate-400 break-all">{formatInr(co.currentOutstanding)} (Limit: {formatInr(co.utilisationPercent ? Math.round(co.currentOutstanding / (co.utilisationPercent / 100)) : 0)})</span>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <ArrowRight className={`w-3.5 h-3.5 ${
-                      co.verdict === "BLOCK" ? "text-rose-400" : "text-blue-400"
-                    }`} />
-                    <span className={`font-mono text-sm font-bold ${
-                      co.verdict === "BLOCK" ? "text-rose-400" : "text-blue-400"
-                    }`}>
-                      {formatInr(co.postOrderOutstanding)}
-                    </span>
-                  </div>
-                </div>
-                <div className="col-span-2 flex justify-center py-1">
-                  <span className={`font-label-md text-xs px-4 py-1.5 rounded-md ${
-                    co.verdict === "BLOCK" ? "bg-rose-500/15 text-rose-400 border border-rose-500/30" :
-                    co.verdict === "CONDITIONAL" ? "bg-amber-500/15 text-amber-400 border border-amber-500/30" :
-                    "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                  }`}>
-                    {co.verdict}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Pane: Action & Comms (4 cols) */}
-        <div className="col-span-4 sticky top-24 flex flex-col h-full bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-xl overflow-hidden relative shadow-2xl">
-          <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-slate-700/40 to-transparent"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Col: Pending Decisions */}
+        <div className="lg:col-span-2 space-y-4">
+          <h3 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
+            Pending Decisions <span className="text-xs bg-indigo-500/20 text-indigo-400 py-0.5 px-2 rounded-full">{pendingOrders.length}</span>
+          </h3>
           
-          <div className="p-6 border-b border-slate-800 bg-slate-800/30">
-            <h2 className="text-lg font-semibold text-white mb-1.5">Decision Matrix</h2>
-            <p className="text-sm text-slate-400">V-8922: Metro Mart • ORD-77A-901</p>
-          </div>
+          {pendingOrders.length === 0 ? (
+            <div className="border border-slate-800 rounded-lg p-8 text-center text-slate-500 bg-slate-900/50">
+              <ShieldCheck className="w-12 h-12 mx-auto text-slate-700 mb-3" />
+              <p>No pending credit decisions.</p>
+              <p className="text-xs mt-1 text-slate-600">All orders are automatically cleared by the agent.</p>
+            </div>
+          ) : (
+            pendingOrders.map((o: any) => {
+              const r = retailers?.find((r: any) => r.id === o.retailer_id) || {};
+              const tScore = r.trustScore || 50;
+              return (
+                <div key={o.id} className="border border-slate-800 rounded-xl bg-slate-900/80 p-5 shadow-lg overflow-hidden relative">
+                  {o.status === "BLOCKED" && <div className="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>}
+                  {o.status === "PENDING_CONFIRMATION" && <div className="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>}
+                  
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h4 className="font-semibold text-white text-lg">{o.retailers?.name || o.retailerName || "Unknown Retailer"}</h4>
+                      <p className="text-xs text-slate-400 font-mono mt-0.5">{o.id}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xl font-bold font-mono text-white">{formatInr(o.total_amount || o.orderValue)}</p>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border uppercase mt-1 inline-block
+                        ${o.status === 'BLOCKED' ? 'border-rose-500/30 text-rose-400 bg-rose-500/10' : 'border-amber-500/30 text-amber-400 bg-amber-500/10'}
+                      `}>
+                        {o.status.replace('_', ' ')}
+                      </span>
+                    </div>
+                  </div>
 
-          <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
-            {/* --- CLEAN POLICY VIOLATION ALERT --- */}
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-5 mb-6 relative overflow-hidden">
-               
-              {/* Header Row: Title & Percentage */}
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3">
-                  {/* Alert Icon */}
-                  <svg className="w-6 h-6 text-red-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                  </svg>
-                  <h4 className="text-red-400 font-bold tracking-wide text-sm uppercase">
-                    Policy Violation Risk
-                  </h4>
+                  {/* AI Context Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Trust Score</p>
+                      <p className={`font-mono font-bold text-lg ${tScore >= 80 ? 'text-emerald-400' : tScore >= 50 ? 'text-amber-400' : 'text-rose-400'}`}>{tScore}</p>
+                    </div>
+                    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Outstanding</p>
+                      <p className="font-mono font-bold text-slate-300 text-sm">{formatInr(r.outstanding || 0)}</p>
+                    </div>
+                    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Credit Limit</p>
+                      <p className="font-mono font-bold text-slate-300 text-sm">{formatInr(r.creditLimit || 50000)}</p>
+                    </div>
+                    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Risk Tier</p>
+                      <p className="font-mono font-bold text-slate-300 text-sm">{r.tier || "C"}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 mb-5 flex gap-3 text-sm">
+                    <BadgeInfo className="w-5 h-5 text-indigo-400 shrink-0" />
+                    <p className="text-indigo-200">
+                      <strong>Agent Insight:</strong> Order value ({formatInr(o.total_amount || o.orderValue)}) combined with outstanding balance exceeds retailer's active credit limit.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 justify-end items-center border-t border-slate-800 pt-4">
+                    <Button 
+                      variant="outline" 
+                      className="border-rose-500/30 text-rose-400 hover:bg-rose-500/10"
+                      onClick={() => handleBlockNudge(o.id, o.retailers?.name || o.retailerName)}
+                      disabled={loading === o.id || o.status === "BLOCKED"}
+                    >
+                      <AlertTriangle className="w-4 h-4 mr-2" /> Block & Send Telegram Nudge
+                    </Button>
+                    <Button 
+                      className="bg-emerald-600 hover:bg-emerald-500 text-white"
+                      onClick={() => handleApprove(o.id)}
+                      disabled={loading === o.id}
+                    >
+                      <ShieldCheck className="w-4 h-4 mr-2" /> Override & Approve
+                    </Button>
+                  </div>
                 </div>
-                <span className="text-red-400 font-bold text-xl leading-none">92%</span>
-              </div>
+              );
+            })
+          )}
+        </div>
 
-              {/* Description Paragraph */}
-              <p className="text-slate-300 text-sm leading-relaxed ml-9">
-                Order value (₹42,500) pushes outstanding to ₹1.62L, breaching hard limit of ₹1.5L. Trust score drop trend detected.
-              </p>
+        {/* Right Col: System Context */}
+        <div className="space-y-6">
+          <div className="border border-slate-800 rounded-xl bg-slate-900/50 p-5">
+            <h3 className="font-semibold text-white mb-4 text-sm uppercase tracking-widest text-slate-400">Risk Policy Engine</h3>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
+                <span className="text-slate-300">Tier A & B automatically approved up to 120% of limit.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
+                <span className="text-slate-300">Tier C requires manual override for any limit breach.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-1.5 shrink-0" />
+                <span className="text-slate-300">Tier D blocked by default for credit orders.</span>
+              </li>
+            </ul>
+          </div>
+          
+          <div className="border border-slate-800 rounded-xl bg-slate-900/50 p-5">
+            <h3 className="font-semibold text-white mb-4 text-sm uppercase tracking-widest text-slate-400">Recent Alerts</h3>
+            <div className="space-y-4">
+              {(alerts || []).slice(0, 4).map((a: any) => (
+                <div key={a.id} className="text-sm">
+                  <div className="flex justify-between mb-1">
+                    <span className={`font-medium ${a.type === 'CRITICAL' ? 'text-rose-400' : 'text-amber-400'}`}>{a.title}</span>
+                    <span className="text-xs text-slate-500">{new Date(a.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p className="text-slate-400 text-xs truncate">{a.message}</p>
+                </div>
+              ))}
+              {(!alerts || alerts.length === 0) && <p className="text-xs text-slate-500">No active risk alerts.</p>}
             </div>
-
-            {/* One-Click Actions */}
-            <div className="flex flex-col gap-4">
-              <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">Workflow Actions</h3>
-              <div className="grid grid-cols-2 gap-4">
-                <button className="bg-slate-800 border border-slate-700 hover:border-blue-500 hover:bg-blue-500/5 text-slate-300 py-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-all group">
-                  <Check className="w-6 h-6 text-slate-500 group-hover:text-blue-400 transition-colors" />
-                  <span className="font-label-md text-xs">Approve</span>
-                </button>
-                <button className="bg-slate-800 border border-slate-700 hover:border-amber-500 hover:bg-amber-500/5 text-slate-300 py-4 rounded-lg flex flex-col items-center justify-center gap-2 transition-all group">
-                  <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                  <span className="font-label-md text-xs">Reduce Limit</span>
-                </button>
-              </div>
-              <button className="w-full bg-rose-500/10 border border-rose-500/50 hover:bg-rose-500 hover:text-white text-rose-400 py-4 rounded-lg flex items-center justify-center gap-3 transition-all font-label-md text-label-md shadow-[0_0_10px_rgba(255,180,171,0.1)]">
-                <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
-                BLOCK + NUDGE
-              </button>
-            </div>
-
-            {/* Communication Draft */}
-              <div className="flex flex-col gap-4 mt-auto pt-6 border-t border-slate-800">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg> Vendor Comms
-                </h3>
-                <span className="bg-slate-800 text-slate-400 font-mono text-xs px-3 py-1 rounded border border-slate-700">AUTO-DRAFT</span>
-              </div>
-              {/* --- CHAT / MESSAGE BOX --- */}
-              <div className="relative bg-[#0f172a] border border-slate-700 rounded-lg p-4 mb-4">
-                <p className="text-sm text-slate-300 leading-relaxed pr-6">
-                  ye order (ORD-77A-901) block hai. Please clear min ₹12,500 to release dispatch.
-                </p>
-                {/* Edit Icon */}
-                <svg className="w-5 h-5 text-slate-400 absolute right-3 bottom-3 cursor-pointer hover:text-slate-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                </svg>
-              </div>
-
-              {/* --- SEND BUTTON --- */}
-              <button className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg py-3 px-4 flex items-center justify-center font-medium transition-colors shadow-lg shadow-blue-500/20">
-                {/* Warning / Send Icon */}
-                <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                </svg>
-                <span className="truncate whitespace-nowrap">EDIT & SEND VIA TELEGRAM</span>
-              </button>
-            </div>
+            <Button variant="ghost" className="w-full mt-4 text-xs text-indigo-400 hover:text-indigo-300 hover:bg-indigo-500/10">
+              View All Alerts <ArrowRight className="w-3 h-3 ml-1" />
+            </Button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

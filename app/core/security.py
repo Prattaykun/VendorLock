@@ -18,6 +18,7 @@ class TokenData(BaseModel):
     user_id: str
     tenant_id: str
     role: str
+    email: str = ""
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -36,6 +37,7 @@ def decode_token(token: str) -> TokenData:
             user_id=payload["user_id"],
             tenant_id=payload["tenant_id"],
             role=payload.get("role", "viewer"),
+            email=payload.get("email", ""),
         )
     except JWTError as exc:
         raise HTTPException(

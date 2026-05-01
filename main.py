@@ -19,7 +19,19 @@ setup_logging()
 async def lifespan(app: FastAPI):
     """Application lifespan — startup / shutdown hooks."""
     await init_db()
+    
+    # Init MongoDB
+    from app.core.mongo import mongodb
+    await mongodb.connect()
+    
+    # Init APScheduler
+    from app.core.scheduler import init_scheduler
+    init_scheduler()
+    
     yield
+    
+    # Shutdown
+    await mongodb.disconnect()
     await close_db()
 
 

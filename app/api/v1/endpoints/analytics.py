@@ -110,25 +110,23 @@ async def pass_through_metrics(user: TokenData = Depends(get_current_user)):
 
 @router.get("/trust-distribution", summary="Trust score distribution across retailers")
 async def trust_distribution(user: TokenData = Depends(get_current_user)):
-    """Histogram of trust scores — used for dashboard heatmap."""
+    """Histogram of trust scores and tier distribution — used for analytics dashboard."""
     try:
-        summary = await supabase_service.get_dashboard_summary(user.tenant_id)
-        return {
-            "distribution": {
-                "A": summary.get("tier_a_count", 0),
-                "B": summary.get("tier_b_count", 0),
-                "C": summary.get("tier_c_count", 0),
-                "D": summary.get("tier_d_count", 0),
-            }
-        }
+        return await supabase_service.get_trust_distribution(user.tenant_id)
     except Exception:
-        return {"distribution": {"A": 0, "B": 0, "C": 0, "D": 0}}
+        return {"tier_distribution": {"A": 0, "B": 0, "C": 0, "D": 0}, "score_histogram": []}
 
 
 @router.get("/revenue-heatmap", summary="Revenue heatmap by route/zone")
-async def revenue_heatmap(user: TokenData = Depends(get_current_user)):
-    """Route-level revenue heatmap data for dashboard."""
-    return {"heatmap": []}
+async def revenue_heatmap(
+    period_days: int = 30,
+    user: TokenData = Depends(get_current_user)
+):
+    """Route-level revenue heatmap aggregated from orders by channel/zone."""
+    try:
+        return await supabase_service.get_revenue_heatmap(user.tenant_id, period_days)
+    except Exception as e:
+        return {"heatmap": [], "error": str(e)}
 
 
 @router.get("/quick-commerce-threat", summary="Quick commerce threat monitor")

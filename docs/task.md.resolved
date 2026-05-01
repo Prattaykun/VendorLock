@@ -1,0 +1,171 @@
+# Task 03: Risk Alerts, Scheme Leakage & Analytics Integration
+
+## Environment Notes
+- **Virtual Environment**: `venv/` (at D:\projects\VendorLock\venv)
+- **pdfplumber**: Already installed in venv (`pdfplumber==0.11.6` in requirements.txt ✓)
+- **pytesseract**: Listed in requirements.txt (`pytesseract==0.3.13`) — requires Tesseract OCR binary installed on OS separately
+- **`/retailer/myscore`**: Moved from incorrect `/myscore` (root-level) → `/retailer/myscore` (correct role-scoped route)
+- **reportlab**: Required for Task 04 certificate PDF generation — must be installed in venv
+- **qrcode**: Required for Task 04 QR code generation — must be installed in venv
+
+## Additional Services Required
+
+### Infrastructure Services (Not Yet Configured)
+| Service | Purpose | When Needed |
+|---|---|---|
+| **AWS S3** (or Cloudflare R2) | Certificate PDF storage (v2), return evidence upload (photos/audio) | When moving from base64 inline → real S3 URL for certs |
+| **Celery + Redis** | Background job queue for async tasks (PDF gen, Agent scans, long-running analytics) | When synchronous Agent 3/6 scans start timing out |
+| **Tesseract OCR binary** | `pytesseract` wrapper for invoice OCR parsing | `winget install UB-Mannheim.TesseractOCR` — before `parse-invoice` endpoint |
+| **FAISS** (faiss-cpu) | Vector store for scheme PDF RAG pipeline | Before Agent 3 auto-ingestion from PDFs |
+| **Embedding model** (e.g. all-MiniLM-L6-v2 via SentenceTransformers) | Scheme rule vectorisation for RAG | Alongside FAISS setup |
+| **Leaflet geocoding** (optional: Nominatim / Google Maps API) | Converting outlet pincodes to GPS lat/lon for real Leaflet heatmap | Already added gps_lat/gps_lon columns to outlets table |
+| **SendGrid / AWS SES** | Email notifications for certificate issue, return approvals | When email alerts are added |
+| **Twilio / WhatsApp API** | WhatsApp-based return filing confirmation (v2) | Agent 4 action notification expansion |
+
+### Python Packages to Install in venv (Task 04)
+```
+pip install reportlab qrcode[pil]
+```
+Document: Add to `requirements.txt` after install.
+
+---
+
+## 3.1 Risk Alerts Dashboard
+- [x] Create `RiskAlertsPanel.tsx` with severity + type filters and acknowledged toggle
+- [x] Display alert cards (severity badge, title, description, rupee impact, timestamp, entity)
+- [x] Wire "Acknowledge" button to `PATCH /risk-alerts/{id}/acknowledge`
+- [x] Build alert detail side-pane from `GET /risk-alerts/{id}`
+- [x] Add "Run Risk Scan" button calling `POST /risk-alerts/run-scan` with loading state
+- [x] Seed 8 risk alerts (CRITICAL/WARNING/INFO, all alert_types) via Supabase MCP
+- [x] Add `listRiskAlerts`, `acknowledgeAlert`, `runRiskScan` to api-client.ts
+- [x] Add "Risk Alerts" tab to DistributorControlTower
+
+## 3.2 Scheme Leakage Panel — Live Data
+- [x] Replace hardcoded VitaGlow/CleanSweep/NutriCrunch with live `getSchemeLeakage(30)` data
+- [x] Replace static leakage bars with Recharts horizontal `BarChart` per scheme
+- [x] Replace active schemes table rows with live `listSchemes()` data
+- [x] Wire MTD total from API response
+- [x] Implement backend `GET /schemes/leakage` via `supabase_service.get_scheme_leakage_report()`
+
+## 3.3 Scheme Pass-Through Analytics
+- [x] `GET /analytics/pass-through-metrics` — kept as smart hardcoded data (realistic simulation, v2 for real aggregation)
+- [ ] **COMING SOON (v2)**: Replace pass-through gauge with Recharts RadialBarChart using real per-retailer data
+- [ ] **COMING SOON (v2)**: SKU fragility real aggregation from `order_items` JOIN `schemes`
+
+## 3.4 Scheme Management
+- [x] Create `SchemesManagementPanel.tsx` with list + create form
+- [x] Fix `SchemeCreateRequest` model (brand → was brand_id, now correct `brand: str`)
+- [x] Implement `POST /schemes/` create form with all fields
+- [x] Scheme status badge (active/expired) based on `valid_to`
+- [x] Seed 3 schemes (Tata, HUL, Nestle) via Supabase MCP
+- [ ] **COMING SOON**: Scheme detail view with per-retailer pass-through from `GET /schemes/{id}/pass-through`
+
+## 3.5 Scheme PDF Upload & RAG Extraction
+- [x] Implement `POST /schemes/ingest-pdf` with real pdfplumber text extraction (up to 10 pages)
+- [x] Returns extracted page text for manual review
+- [ ] **COMING SOON (v2)**: Auto-ingestion into FAISS vector store and Agent 3 RAG pipeline
+- [ ] **COMING SOON (v2)**: `GET /pdf/extraction-status/{job_id}` job tracking endpoint
+- [ ] **COMING SOON (v2)**: Connect scheme upload page (`/scheme/upload`) UI to show extraction results
+
+## 3.6 PDF Parser Endpoints
+- [ ] **COMING SOON (v2)**: `POST /pdf/parse-invoice` — OCR with pytesseract/pdfplumber, entity extraction
+  - Requires: Tesseract OCR binary installed on host OS (`winget install UB-Mannheim.TesseractOCR`)
+  - Requires: S3 bucket configured (or local fallback) for file storage
+- [ ] **COMING SOON (v2)**: `POST /pdf/parse-scheme` — scheme rule extraction with structured output
+
+## 3.7 Revenue Heatmap
+- [x] Implement `GET /analytics/revenue-heatmap` to aggregate revenue by channel from orders table
+- [x] Create `RevenueHeatmapPanel.tsx` with conditional-formatted table and period selector (7D/30D/90D)
+- [x] Add `getRevenueHeatmap(periodDays)` to api-client.ts
+- [x] Add to Analytics tab in DistributorControlTower
+
+## 3.8 Trust Distribution Analytics
+- [x] Update `GET /analytics/trust-distribution` to return both tier counts AND score histogram
+- [x] Implement `supabase_service.get_trust_distribution()` with 5 score buckets (0-20, 21-40, 41-60, 61-80, 81-100)
+- [x] Create `TrustDistributionChart.tsx` with Recharts BarChart histogram + PieChart tier distribution
+- [x] Add `getTrustDistributionAnalytics()` to api-client.ts
+- [ ] **COMING SOON**: Add filters by route, zone, or time period
+
+## 3.9 Agent Pipeline Trigger UI
+- [x] Create `AgentTriggerPanel.tsx` with agent dropdown (Agents 1-6)
+- [x] JSON payload textarea with validation
+- [x] "Run Agent" button calling `POST /agent/run` with loading state
+- [x] Session-state run history with formatted JSON output
+- [x] Add "Dev Tools" tab to DistributorControlTower
+
+## Route Fix
+- [x] Move `/myscore` page from wrong `/app/myscore/` to correct `/app/retailer/myscore/` per role-based routing convention
+- [x] Delete old `/app/myscore/` directory
+
+---
+
+# Task 04: Beat Intelligence, Expiry & Returns, Certificate Integration
+
+## Environment Notes
+- **reportlab**: Required for PDF generation → `pip install reportlab` in venv, then add to requirements.txt
+- **qrcode**: Required for QR code images → `pip install qrcode[pil]` in venv
+- **GPS columns**: Added `gps_lat`, `gps_lon` to `outlets` table via migration (ready for Leaflet v2)
+- **New tables**: `batches` and `certificates` created via migration
+
+## 4.1 Beat Intelligence Panel
+- [x] Replace hardcoded `"sm-1"` with dynamic salesman dropdown from `listSalesmenDirect`
+- [x] Beat plan auto-fetches on salesman change via `GET /beat-plan/{salesman_id}`
+- [x] Add Coverage Gaps tab — calls `GET /beat-plan/coverage/gaps` (live from outlets + checkins)
+- [x] Add Ghost Visits tab — calls `GET /beat-plan/ghost-visits/report` (unverified checkins)
+- [x] Add "Generate Beat Plans" button calling `POST /beat-plan/generate`
+- [x] Implement backend `get_coverage_gaps()` in supabase_service.py
+- [x] Implement backend `get_ghost_visit_report()` in supabase_service.py
+- [x] Seed 3 outlets (with GPS lat/lon), 2 beat_checkins
+- [x] Add `getCoverageGaps`, `getGhostVisitReport`, `generateBeatPlansAll`, `logCheckin` to api-client.ts
+
+## 4.2 Expiry & Returns Panel — Live Data
+- [x] Wire `GET /expiry/alerts` → real expiry alert cards (replaces Greek Yogurt/Almond hardcoded)
+- [x] Dynamic 14-day rolling calendar grid built from real expiry dates
+- [x] Live alert count in panel header (CRITICAL · WARNING · SAFE)
+- [x] Wire "File Brand Return Claim" button to `POST /expiry/claim-brand-return/{batch_id}`
+- [x] Replace hardcoded `returnRequests` mock with live `GET /returns/` data
+- [x] Wire ✓ Approve button to `PATCH /returns/{id}/approve`
+- [x] Wire ✗ Reject button to `PATCH /returns/{id}/reject`
+- [x] Create `batches` table in Supabase with migration
+- [x] Seed 3 batches (CRITICAL 5 days, WARNING 25 days, SAFE 75 days)
+- [x] Seed 2 returns (GENUINE/APPROVED, SUSPICIOUS/PENDING)
+- [x] Add `getExpiryAlerts`, `listBatches`, `registerBatch`, `claimBrandReturn`, `listReturns`, `submitReturn`, `approveReturn`, `rejectReturn` to api-client.ts
+- [x] VaR widget shows live sum of CRITICAL batch values
+
+## 4.3 Trust Certificate Generation
+- [x] Create `certificates` table with `pdf_base64`, `s3_url` (future), `hash` columns
+- [x] Implement `POST /certificate/generate`: fetches real trust score, generates ReportLab PDF (in-memory base64), SHA-256 hash chain
+- [x] PDF served as inline `data:application/pdf;base64,...` URL (no S3 needed for MVP)
+- [x] `s3_url` column reserved — swap with real S3 upload in v2
+- [x] QR verification URL points to `/certificate/verify/{code}` on vendorlock.in
+- [x] Implement `GET /certificate/verify/{id}`: real DB fetch + tamper detection via hash comparison
+- [x] Implement `GET /certificate/{retailer_id}/history`: real DB query
+- [x] Add `register_certificate`, `get_certificate`, `get_certificate_history` to supabase_service.py
+- [x] Create `/app/distributor/certificate/page.tsx`: retailer search, generate button, PDF download, history table
+- [x] Create `/app/certificate/verify/[id]/page.tsx`: public route, no auth, tamper-detection badge, trust score display
+- [x] Add `generateCertificate`, `verifyCertificate`, `getCertificateHistory` to api-client.ts
+
+## 4.4 Salesman Check-In UI
+- [ ] **COMING SOON**: Salesman check-in form (belongs in Salesman mobile app, not distributor dashboard)
+- [x] Backend `POST /beat-plan/checkin` already functional (GPS lat/lon support)
+- [x] `logCheckin()` added to api-client.ts for future use
+
+---
+
+## Coming Soon Items Summary (Tasks 03 + 04)
+| Feature | Reason Deferred | Blocker / Action |
+|---|---|---|
+| FAISS RAG auto-ingestion | Complex infra | Install: `pip install faiss-cpu sentence-transformers` |
+| `parse-invoice` OCR | Requires OS binary | `winget install UB-Mannheim.TesseractOCR` |
+| `parse-scheme` structured output | LLM prompt engineering needed | Agent 3 prompt tuning |
+| PDF extraction status tracking | Needs background job queue | Install: Celery + Redis |
+| Per-retailer pass-through breakdown | DB schema: `scheme_retailer_benefits` table | Schema migration |
+| QC threat monitor | Agent 5 scraping not implemented | Web scraper + price DB |
+| Secondary sales estimate | Agent 5 demand forecast not wired | Model training data |
+| Trust distribution filters by route | `retailers.route_id` FK not wired | Beat plan join |
+| Certificate PDF → real S3 upload | AWS credentials not configured | Add `AWS_S3_*` to `.env`, `pip install boto3` |
+| Return evidence upload (photos/audio) | Needs S3 storage | Same as above |
+| Leaflet GPS outlet heatmap | Outlets need geocoding | Add coords to outlets via admin form or geocoding API |
+| Salesman check-in mobile UI | Belongs in salesman app, not dashboard | New Flutter/React Native app |
+| Duplicate check-in prevention | Time-window logic in Agent 6 | Agent 6 prompt update |
+| Certificate QR code image in PDF | `qrcode` lib not yet installed | `pip install qrcode[pil]` in venv |

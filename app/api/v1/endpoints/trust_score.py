@@ -34,6 +34,23 @@ class TrustScoreBreakdown(BaseModel):
     composite: float
 
 
+@router.get("/query/myscore", summary="Retailer self-service: MYSCORE query")
+async def myscore(user: TokenData = Depends(get_current_user)):
+    """
+    Endpoint triggered when a retailer sends 'MYSCORE' via Telegram/WhatsApp.
+    Returns a chat-friendly summary of their score + tier.
+    """
+    try:
+        # In production, look up retailer by user_id
+        return {
+            "message": "Your Trust Score is 50 — Tier C (Caution). Build your score with on-time payments!",
+            "score": 50,
+            "tier": "C",
+        }
+    except Exception:
+        return {"message": "Score unavailable. Please try again later.", "score": 0, "tier": "?"}
+
+
 @router.get("/{retailer_id}", response_model=TrustScoreResponse, summary="Get Trust Score for a retailer")
 async def get_trust_score(retailer_id: str, user: TokenData = Depends(get_current_user)):
     """
@@ -107,22 +124,6 @@ async def get_trust_history(
     except Exception:
         return {"retailer_id": retailer_id, "history": [], "days": days}
 
-
-@router.get("/query/myscore", summary="Retailer self-service: MYSCORE query")
-async def myscore(user: TokenData = Depends(get_current_user)):
-    """
-    Endpoint triggered when a retailer sends 'MYSCORE' via Telegram/WhatsApp.
-    Returns a chat-friendly summary of their score + tier.
-    """
-    try:
-        # In production, look up retailer by user_id
-        return {
-            "message": "Your Trust Score is 50 — Tier C (Caution). Build your score with on-time payments!",
-            "score": 50,
-            "tier": "C",
-        }
-    except Exception:
-        return {"message": "Score unavailable. Please try again later.", "score": 0, "tier": "?"}
 
 
 @router.post("/recalculate/{retailer_id}", summary="Trigger score recalculation (admin)")

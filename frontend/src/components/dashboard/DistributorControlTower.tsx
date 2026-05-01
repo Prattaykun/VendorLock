@@ -23,8 +23,9 @@ import {
 } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import type { Retailer, RetailerTier } from "@/types/dashboard";
-import { alerts as mockAlerts, actionCards as mockActionCards, orderFeed as mockOrderFeed, retailers as mockRetailers } from "@/lib/mock-data";
-import { getDashboardSummary, getRetailers, listOrders, listAlerts, setAuthToken } from "@/lib/api-client";
+import { getDashboardSummary, getRetailers, listOrders, listAlerts } from "@/lib/api-client";
+import { useAuth } from "@/components/AuthProvider";
+import { ShoppingCart } from "lucide-react";
 import {
   formatInr, formatTimeStable, formatDateStable,
   alertPillClass, orderStatusClass, tierClass, trendArrow, trendClass, scoreColor, scoreBarColor,
@@ -34,18 +35,36 @@ import SchemeLeakagePanel from "./SchemeLeakagePanel";
 import BeatIntelligencePanel from "./BeatIntelligencePanel";
 import ExpiryCalendarPanel from "./ExpiryCalendarPanel";
 import AuditTrailPanel from "./AuditTrailPanel";
+import OrdersPanel from "./OrdersPanel";
+import TrustScoreCard from "./TrustScoreCard";
+import OrderTrendChart from "./OrderTrendChart";
+import CreditDistributionChart from "./CreditDistributionChart";
+import RiskAlertsPanel from "./RiskAlertsPanel";
+import SchemesManagementPanel from "./SchemesManagementPanel";
+import TrustDistributionChart from "./TrustDistributionChart";
+import RevenueHeatmapPanel from "./RevenueHeatmapPanel";
+import AgentTriggerPanel from "./AgentTriggerPanel";
+import TelegramConfigPanel from "./TelegramConfigPanel";
+import MessageMonitoringPanel from "./MessageMonitoringPanel";
+import DisputedCollectionsPanel from "./DisputedCollectionsPanel";
 
-type PanelKey = "command-center" | "trust-map" | "credit-decisions" | "scheme-leakage" | "beat-intelligence" | "expiry-calendar" | "audit-trail";
+type PanelKey = "command-center" | "trust-map" | "order-management" | "credit-decisions" | "scheme-leakage" | "risk-alerts" | "schemes-management" | "analytics" | "beat-intelligence" | "expiry-calendar" | "audit-trail" | "telegram-ops" | "dev-tools";
 type SortKey = "name" | "trustScore" | "tier" | "outstanding" | "creditLimit" | "lastPaymentDate" | "trend";
 
-const panelItems: { key: PanelKey; label: string; icon: ReactNode }[] = [
+const panelItems: { key: PanelKey; label: string; icon: ReactNode; badge?: number }[] = [
   { key: "command-center", label: "Command Center", icon: <LayoutDashboard size={18} /> },
   { key: "trust-map", label: "Trust Map", icon: <Map size={18} /> },
+  { key: "order-management", label: "Order Management", icon: <ShoppingCart size={18} /> },
   { key: "credit-decisions", label: "Credit Decisions", icon: <CreditCard size={18} /> },
+  { key: "risk-alerts", label: "Risk Alerts", icon: <AlertTriangle size={18} /> },
   { key: "scheme-leakage", label: "Scheme Leakage", icon: <BarChart3 size={18} /> },
+  { key: "schemes-management", label: "Schemes", icon: <BarChart3 size={18} /> },
+  { key: "analytics", label: "Analytics", icon: <BarChart3 size={18} /> },
   { key: "beat-intelligence", label: "Beat Intelligence", icon: <Navigation size={18} /> },
   { key: "expiry-calendar", label: "Expiry & Returns", icon: <CalendarClock size={18} /> },
+  { key: "telegram-ops", label: "Telegram Ops", icon: <Phone size={18} /> },
   { key: "audit-trail", label: "Audit Trail", icon: <ShieldCheck size={18} /> },
+  { key: "dev-tools", label: "Dev Tools", icon: <ShieldCheck size={18} /> },
 ];
 
 const fadeUp = { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -10 }, transition: { duration: 0.5 } };
@@ -83,65 +102,96 @@ function ScoreBar({ label, value, color }: { label: string; value: number; color
 
 export default function DistributorControlTower() {
   const { theme, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const [activePanel, setActivePanel] = useState<PanelKey>("command-center");
   const [lastAction, setLastAction] = useState<string>("");
   const [tierFilter, setTierFilter] = useState<"ALL" | RetailerTier>("ALL");
   const [sortBy, setSortBy] = useState<SortKey>("trustScore");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [selectedRetailer, setSelectedRetailer] = useState<Retailer | null>(mockRetailers[0] || null);
+  const [selectedRetailer, setSelectedRetailer] = useState<Retailer | null>(null);
   const [mobileNav, setMobileNav] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  // Live Data State
-  const [alerts, setAlerts] = useState(mockAlerts);
-  const [actionCards, setActionCards] = useState(mockActionCards);
-  const [orderFeed, setOrderFeed] = useState(mockOrderFeed);
-  const [retailers, setRetailers] = useState(mockRetailers);
+  // Live Data State — start empty, no mock fallback
+  const [alerts, setAlerts] = useState<any[]>([]);
+  const [actionCards, setActionCards] = useState<any[]>([]);
+  const [orderFeed, setOrderFeed] = useState<any[]>([]);
+  const [retailers, setRetailers] = useState<Retailer[]>([]);
   const [summary, setSummary] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsDataLoading(true);
+      setApiError(null);
       try {
         const [sumRes, retRes, ordRes, alertRes] = await Promise.allSettled([
           getDashboardSummary(),
           getRetailers(),
           listOrders({ limit: 10 }),
-          listAlerts()
+          listAlerts(),
         ]);
 
         if (sumRes.status === "fulfilled") setSummary(sumRes.value);
+        else setApiError("Dashboard summary unavailable.");
+
         if (retRes.status === "fulfilled" && retRes.value.retailers?.length) {
-          // Map DB retailers to UI format
           setRetailers(retRes.value.retailers.map((r: any) => ({
-            id: r.id, name: r.name || "Unknown Retailer", tier: (r.trust_scores?.[0]?.tier || "C") as RetailerTier,
-            trustScore: r.trust_scores?.[0]?.composite_score || 50, trend: "STABLE", outstanding: r.outstanding || 0,
-            creditLimit: r.credit_limit || 50000, lastPaymentDate: r.created_at || new Date().toISOString(),
-            factors: r.trust_scores?.[0]?.sub_scores || { paymentDiscipline: 50, orderConsistency: 50, cancellationRate: 50, returnFrequency: 50, communicationReliability: 50, tradeStability: 50 }
+            id: r.id,
+            name: r.name || "Unknown Retailer",
+            tier: (r.trust_scores?.[0]?.tier || "C") as RetailerTier,
+            trustScore: r.trust_scores?.[0]?.composite_score || 50,
+            trend: (r.trust_scores?.[0]?.trend || "STABLE") as any,
+            outstanding: r.outstanding || 0,
+            creditLimit: r.credit_limit || 50000,
+            lastPaymentDate: r.created_at || new Date().toISOString(),
+            factors: r.trust_scores?.[0]?.sub_scores || {
+              paymentDiscipline: 50, orderConsistency: 50, cancellationRate: 50,
+              returnFrequency: 50, communicationReliability: 50, tradeStability: 50,
+            },
           })));
         }
+
         if (ordRes.status === "fulfilled" && ordRes.value.orders?.length) {
           setOrderFeed(ordRes.value.orders.map((o: any) => ({
-            id: o.id, retailerId: o.retailer_id, retailerName: "Retailer " + o.retailer_id.slice(0, 4),
-            status: o.status, orderValue: o.total_amount || 0, itemCount: o.items?.length || 1, createdAt: o.created_at
+            id: o.id,
+            retailerName: o.retailer_id ? "Retailer " + o.retailer_id.slice(0, 6) : "Unknown",
+            status: o.status,
+            orderValue: o.total_amount || 0,
+            itemCount: o.items?.length || 1,
+            createdAt: o.created_at,
+          })));
+        }
+
+        if (alertRes.status === "fulfilled" && alertRes.value.alerts?.length) {
+          setAlerts(alertRes.value.alerts.map((a: any) => ({
+            id: a.id,
+            type: a.severity === "CRITICAL" ? "CRITICAL" : a.severity === "WARNING" ? "WARNING" : "INFO",
+            title: a.title || a.alert_type,
+            message: a.description || "",
+            createdAt: a.created_at,
+            resolved: a.acknowledged,
           })));
         }
       } catch (err) {
-        // Silently fail and use mock data
+        setApiError("Unable to load dashboard data. Check your connection.");
       } finally {
         setIsDataLoading(false);
       }
     };
     fetchData();
-  }, [activePanel]);
+  }, []);
 
   const atRiskRetailers = [...retailers].sort((a, b) => a.trustScore - b.trustScore).slice(0, 3);
-  const unresolvedCritical = alerts.filter((a) => a.type === "CRITICAL" && !a.resolved);
   const alertSummary = {
     CRITICAL: summary?.critical_alerts ?? alerts.filter((a) => a.type === "CRITICAL" && !a.resolved).length,
-    WARNING: alerts.filter((a) => a.type === "WARNING" && !a.resolved).length,
+    WARNING: summary?.open_alerts
+      ? summary.open_alerts - (summary.critical_alerts || 0)
+      : alerts.filter((a) => a.type === "WARNING" && !a.resolved).length,
     INFO: alerts.filter((a) => a.type === "INFO" && !a.resolved).length,
   };
+  const displayName = user?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "there";
+  const todayLabel = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short", year: "numeric" });
 
   const trustRows = useMemo(() => {
     const filtered = tierFilter === "ALL" ? retailers : retailers.filter((r) => r.tier === tierFilter);
@@ -178,12 +228,27 @@ export default function DistributorControlTower() {
             <div className="mt-5 flex items-center gap-3 rounded-xl px-3.5 py-3 relative overflow-hidden" style={{ background: "var(--surface-user-card)", border: "1px solid var(--border-ghost-inner)" }}>
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/[0.03] to-transparent pointer-events-none" />
               <Avatar className="h-9 w-9 relative z-10">
-                <AvatarFallback className="text-white text-xs font-bold bg-gradient-to-br from-cyan-500 to-indigo-600">RM</AvatarFallback>
+                <AvatarFallback className="text-white text-xs font-bold bg-gradient-to-br from-cyan-500 to-indigo-600">
+                  {(user?.full_name || user?.email || "U").slice(0, 2).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
-              <div className="min-w-0 relative z-10">
-                <p className="text-sm font-semibold truncate" style={{ color: "var(--text-heading)" }}>Ravi Mehta</p>
-                <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>Pune Zone · 8 retailers</p>
+              <div className="min-w-0 relative z-10 flex-1">
+                <p className="text-sm font-semibold truncate" style={{ color: "var(--text-heading)" }}>
+                  {user?.full_name || user?.email || "User"}
+                </p>
+                <p className="text-[10px] mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ""}
+                </p>
               </div>
+              <button
+                onClick={logout}
+                title="Logout"
+                className="relative z-10 text-zinc-500 hover:text-red-400 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
             </div>
           </div>
           {/* Navigation */}
@@ -261,8 +326,8 @@ export default function DistributorControlTower() {
             <div className="flex flex-col gap-4 px-5 py-5 sm:px-8">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h1 className="text-2xl font-extrabold sm:text-[1.75rem] tracking-tighter text-white">Good morning, Ravi</h1>
-                  <p className="text-[11px] mt-1 tracking-wide text-zinc-400">Friday, 25 Apr 2026 · {panelItems.find((p) => p.key === activePanel)?.label}</p>
+                  <h1 className="text-2xl font-extrabold sm:text-[1.75rem] tracking-tighter text-white">Good morning, {displayName}</h1>
+                  <p className="text-[11px] mt-1 tracking-wide text-zinc-400">{todayLabel} · {panelItems.find((p) => p.key === activePanel)?.label}</p>
                 </div>
                 <div className="flex gap-2">
                   <Badge className="rounded-full px-3 py-1.5 text-[11px] font-semibold bg-rose-500/10 text-rose-400 border-rose-500/20" style={{ boxShadow: "var(--badge-glow-critical)" }}>{alertSummary.CRITICAL} Critical</Badge>
@@ -275,6 +340,12 @@ export default function DistributorControlTower() {
 
           <motion.main variants={fadeUp} className="flex-1 px-4 py-5 sm:px-6">
             <AnimatePresence mode="wait">
+              {apiError && (
+                <motion.div key="api-error" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-4 flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
+                  <p className="text-sm text-amber-300">⚠ {apiError}</p>
+                  <button onClick={() => setApiError(null)} className="text-xs text-amber-500 hover:text-amber-300">dismiss</button>
+                </motion.div>
+              )}
               {lastAction && (
                 <motion.div key="toast" initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-4 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
                   <p className="text-sm text-emerald-300">✓ {lastAction}</p>
@@ -323,11 +394,13 @@ export default function DistributorControlTower() {
                       {/* Cleared */}
                       <div className="rounded-lg px-4 py-3 flex items-center gap-4 min-w-[140px]" style={{ backgroundColor: "#1f2a3c", border: "1px solid #424754" }}>
                         <div className="p-2 rounded-md" style={{ backgroundColor: "rgba(77, 142, 255, 0.1)" }}>
-                          <svg className="w-5 h-5" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
+                          <svg className="w-5 h-5" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41 1.41L10 14.17l7.59-7.59L19 8l-9 9z" /></svg>
                         </div>
                         <div>
                           <p className="text-xs uppercase" style={{ color: "#c2c6d6" }}>Cleared</p>
-                          <p className="text-2xl font-bold" style={{ color: "#adc6ff" }}>892</p>
+                           <p className="text-2xl font-bold" style={{ color: "#adc6ff" }}>
+                              {summary?.total_retailers ?? retailers.length}
+                            </p>
                         </div>
                       </div>
                     </div>
@@ -412,8 +485,10 @@ export default function DistributorControlTower() {
                               <svg className="w-4 h-4" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" /></svg>
                             </div>
                           </div>
-                          <div className="flex items-end justify-between">
-                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>847</span>
+                        <div className="flex items-end justify-between">
+                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>
+                              {isDataLoading ? <span className="inline-block w-16 h-8 bg-zinc-700 animate-pulse rounded" /> : (summary?.total_retailers ?? retailers.length)}
+                            </span>
                             <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(77, 142, 255, 0.15)", color: "#adc6ff" }}>+12%</span>
                           </div>
                         </motion.div>
@@ -432,7 +507,9 @@ export default function DistributorControlTower() {
                             </div>
                           </div>
                           <div className="flex items-end justify-between">
-                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>2,341</span>
+                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>
+                              {isDataLoading ? <span className="inline-block w-16 h-8 bg-zinc-700 animate-pulse rounded" /> : (summary?.total_orders ?? orderFeed.length)}
+                            </span>
                             <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(183, 200, 225, 0.15)", color: "#b7c8e1" }}>+8%</span>
                           </div>
                         </motion.div>
@@ -451,7 +528,16 @@ export default function DistributorControlTower() {
                             </div>
                           </div>
                           <div className="flex items-end justify-between">
-                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>₹4.2L</span>
+                            <span className="text-3xl font-bold" style={{ color: "#d8e3fb" }}>
+                              {isDataLoading
+                                ? <span className="inline-block w-16 h-8 bg-zinc-700 animate-pulse rounded" />
+                                : summary?.total_outstanding != null
+                                  ? `₹${(summary.total_outstanding / 100000).toFixed(1)}L`
+                                  : retailers.length
+                                    ? `₹${(retailers.reduce((s: number, r: any) => s + (r.outstanding || 0), 0) / 100000).toFixed(1)}L`
+                                    : "—"
+                              }
+                            </span>
                             <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(255, 180, 171, 0.15)", color: "#ffb4ab" }}>-3%</span>
                           </div>
                         </motion.div>
@@ -478,45 +564,8 @@ export default function DistributorControlTower() {
 
                       {/* Chart Placeholders Grid */}
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.4 }}
-                          className="rounded-xl p-6 min-h-[280px] flex flex-col"
-                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
-                        >
-                          <div className="flex items-center justify-between mb-6">
-                            <h4 className="text-base font-semibold" style={{ color: "#d8e3fb" }}>Order Volume Trend</h4>
-                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(77, 142, 255, 0.15)", color: "#adc6ff" }}>Last 30 days</span>
-                          </div>
-                          <div className="flex-1 flex items-center justify-center rounded-lg" style={{ backgroundColor: "rgba(21, 32, 49, 0.5)" }}>
-                            <div className="text-center">
-                              <svg className="w-12 h-12 mx-auto mb-3 opacity-40" style={{ color: "#adc6ff" }} fill="currentColor" viewBox="0 0 24 24"><path d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z" /></svg>
-                              <p className="text-sm" style={{ color: "#8c909f" }}>Line Chart Placeholder</p>
-                              <p className="text-xs mt-1" style={{ color: "#636b7a" }}>Orders over time visualization</p>
-                            </div>
-                          </div>
-                        </motion.div>
-
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.5 }}
-                          className="rounded-xl p-6 min-h-[280px] flex flex-col"
-                          style={{ backgroundColor: "rgba(15, 23, 42, 0.6)", backdropFilter: "blur(12px)", border: "1px solid rgba(66, 71, 84, 0.5)", boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)" }}
-                        >
-                          <div className="flex items-center justify-between mb-6">
-                            <h4 className="text-base font-semibold" style={{ color: "#d8e3fb" }}>Credit Distribution</h4>
-                            <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(183, 200, 225, 0.15)", color: "#b7c8e1" }}>By Tier</span>
-                          </div>
-                          <div className="flex-1 flex items-center justify-center rounded-lg" style={{ backgroundColor: "rgba(21, 32, 49, 0.5)" }}>
-                            <div className="text-center">
-                              <svg className="w-12 h-12 mx-auto mb-3 opacity-40" style={{ color: "#b7c8e1" }} fill="currentColor" viewBox="0 0 24 24"><path d="M11 2v20c-5.07-5.08-11-5.08-11-11S5.93 2 11 2zm9.07 4.93l-2.83 2.83c1.26 1.26 1.26 3.3 0 4.56l2.83 2.83c2.07-2.08 2.07-5.45 0-7.53l-2.83-2.83c-1.28 1.28-1.28 3.44 0 4.72zM5.93 16.07C3.85 18.15 3.85 22.5 5.93 24.57l-2.83 2.83c-2.08-2.07-2.08-5.43 0-7.53l2.83-2.83c-1.28 1.28-1.28 3.43 0 4.72z" transform="rotate(45 12 12)" /></svg>
-                              <p className="text-sm" style={{ color: "#8c909f" }}>Donut Chart Placeholder</p>
-                              <p className="text-xs mt-1" style={{ color: "#636b7a" }}>Credit allocation by tier</p>
-                            </div>
-                          </div>
-                        </motion.div>
+                        <OrderTrendChart orders={orderFeed} />
+                        <CreditDistributionChart retailers={retailers} />
                       </div>
                     </div>
 
@@ -534,12 +583,12 @@ export default function DistributorControlTower() {
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                           {orderFeed.slice(0, 5).map((order, i) => (
-                            <div key={order.id} className="relative pl-6">
+                            <div key={order.id} className="relative pl-6 cursor-pointer" onClick={() => setActivePanel("order-management")}>
                               <div className="absolute left-0 top-1 w-5 h-5 rounded-full flex items-center justify-center" style={{ backgroundColor: "#152031", border: `2px solid ${order.status === "CONFIRMED" ? "#adc6ff" : order.status === "BLOCKED" ? "#ffb4ab" : "#b7c8e1"}` }}>
                                 {order.status === "CONFIRMED" && <div className="w-2 h-2 rounded-full" style={{ backgroundColor: "#adc6ff" }}></div>}
                                 {order.status === "BLOCKED" && <svg className="w-3 h-3" style={{ color: "#ffb4ab" }} fill="currentColor" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 17.59 19 12 12z" /></svg>}
                               </div>
-                              <div className="rounded-lg p-3" style={{ backgroundColor: "#2a3548", border: "1px solid rgba(66, 71, 84, 0.3)" }}>
+                              <div className="rounded-lg p-3 hover:bg-slate-800/80 transition-colors" style={{ backgroundColor: "#2a3548", border: "1px solid rgba(66, 71, 84, 0.3)" }}>
                                 <div className="flex justify-between items-start mb-1">
                                   <span className="text-xs font-mono" style={{ color: "#8c909f" }}>{formatTimeStable(order.createdAt)}</span>
                                   <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ backgroundColor: order.status === "CONFIRMED" ? "rgba(77, 142, 255, 0.1)" : order.status === "BLOCKED" ? "rgba(255, 180, 171, 0.1)" : "rgba(183, 200, 225, 0.1)", color: order.status === "CONFIRMED" ? "#adc6ff" : order.status === "BLOCKED" ? "#ffb4ab" : "#b7c8e1", border: `1px solid ${order.status === "CONFIRMED" ? "rgba(77, 142, 255, 0.2)" : order.status === "BLOCKED" ? "rgba(255, 180, 171, 0.2)" : "rgba(183, 200, 225, 0.2)"}` }}>
@@ -608,8 +657,8 @@ export default function DistributorControlTower() {
                                   <p className="font-medium text-slate-200">{r.name}</p>
                                   {r.hindiName && <p className="text-xs text-slate-500">{r.hindiName}</p>}
                                 </TableCell>
-                                <TableCell className="pl-6 pr-3 py-3">
-                                  <span className={`font-mono font-medium ${r.trustScore >= 80 ? "text-emerald-400" : r.trustScore >= 50 ? "text-amber-400" : "text-red-400"}`}>{r.trustScore}</span>
+                                <TableCell className="pl-6 pr-3 py-3 w-48">
+                                  <TrustScoreCard retailerId={r.id} />
                                 </TableCell>
                                 <TableCell className="pl-6 pr-3 py-3">
                                   <Badge className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${r.tier === "A" ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" : r.tier === "B" ? "bg-amber-500/20 text-amber-400 border border-amber-500/30" : r.tier === "C" ? "bg-orange-500/20 text-orange-400 border border-orange-500/30" : "bg-red-500/20 text-red-400 border border-red-500/30"}`}>
@@ -694,12 +743,34 @@ export default function DistributorControlTower() {
                 </motion.div>
               )}
 
-              {/* ── Panels 3–7 ───────────────────────────────────── */}
+              {/* ── All Panels ───────────────────────────────────── */}
+              {activePanel === "order-management" && <motion.div key="orders" {...fadeUp}><OrdersPanel orders={orderFeed} setOrders={setOrderFeed} retailers={retailers} /></motion.div>}
               {activePanel === "credit-decisions" && <motion.div key="credit" {...fadeUp}><CreditDecisionPanel onAction={setLastAction} orders={orderFeed} alerts={alerts} retailers={retailers} /></motion.div>}
+              {activePanel === "risk-alerts" && <motion.div key="risk" {...fadeUp}><RiskAlertsPanel /></motion.div>}
               {activePanel === "scheme-leakage" && <motion.div key="scheme" {...fadeUp}><SchemeLeakagePanel /></motion.div>}
+              {activePanel === "schemes-management" && <motion.div key="schemes" {...fadeUp}><SchemesManagementPanel /></motion.div>}
+              {activePanel === "analytics" && <motion.div key="analytics" {...fadeUp}>
+                <div className="p-6 space-y-6">
+                  <h2 className="text-2xl font-bold text-white">Analytics Dashboard</h2>
+                  <TrustDistributionChart />
+                  <RevenueHeatmapPanel />
+                </div>
+              </motion.div>}
               {activePanel === "beat-intelligence" && <motion.div key="beat" {...fadeUp}><BeatIntelligencePanel /></motion.div>}
               {activePanel === "expiry-calendar" && <motion.div key="expiry" {...fadeUp}><ExpiryCalendarPanel onAction={setLastAction} /></motion.div>}
+              {activePanel === "telegram-ops" && (
+                <motion.div key="telegram" {...fadeUp}>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="space-y-6">
+                      <TelegramConfigPanel />
+                      <DisputedCollectionsPanel />
+                    </div>
+                    <MessageMonitoringPanel />
+                  </div>
+                </motion.div>
+              )}
               {activePanel === "audit-trail" && <motion.div key="audit" {...fadeUp}><AuditTrailPanel /></motion.div>}
+              {activePanel === "dev-tools" && <motion.div key="dev" {...fadeUp}><AgentTriggerPanel /></motion.div>}
             </AnimatePresence>
           </motion.main>
         </motion.section>

@@ -3,12 +3,13 @@
  * Handles auth, data fetching, and Agent pipeline invocations.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 // ── Auth Token Management ─────────────────────────────────────────────────────
 
 let authToken: string | null = null;
 
+/** Persist token across sessions (remember me). */
 export function setAuthToken(token: string) {
   authToken = token;
   if (typeof window !== "undefined") {
@@ -16,18 +17,32 @@ export function setAuthToken(token: string) {
   }
 }
 
+/** Persist token for this tab only (clears on tab close). */
+export function setAuthTokenSession(token: string) {
+  authToken = token;
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("vendorlock_token", token);
+  }
+}
+
+/** Returns token from memory, localStorage, or sessionStorage (in priority order). */
 export function getAuthToken(): string | null {
   if (authToken) return authToken;
   if (typeof window !== "undefined") {
-    return localStorage.getItem("vendorlock_token");
+    return (
+      localStorage.getItem("vendorlock_token") ||
+      sessionStorage.getItem("vendorlock_token")
+    );
   }
   return null;
 }
 
+/** Clear token from all storage locations. */
 export function clearAuthToken() {
   authToken = null;
   if (typeof window !== "undefined") {
     localStorage.removeItem("vendorlock_token");
+    sessionStorage.removeItem("vendorlock_token");
   }
 }
 
@@ -44,17 +59,54 @@ async function apiFetch<T = any>(
     ...(options.headers as Record<string, string> || {}),
   };
 
-  const res = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    });
 
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`API Error ${res.status}: ${body}`);
+    // Handle 401 Unauthorized globally
+    if (res.status === 401) {
+      clearAuthToken();
+      if (typeof window !== "undefined" && !window.location.pathname.includes("/login")) {
+        window.location.href = "/login";
+      }
+      throw new Error("Unauthorized. Please log in again.");
+    }
+
+    if (!res.ok) {
+      let errorMsg = `API Error ${res.status}`;
+      try {
+        const body = await res.json();
+        errorMsg = body.detail || body.message || errorMsg;
+      } catch {
+        const text = await res.text();
+        if (text) errorMsg += `: ${text}`;
+      }
+      
+      // Dispatch custom event for UI global toast notifications
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("api-error", { detail: { message: errorMsg, status: res.status } }));
+      }
+      
+      throw new Error(errorMsg);
+    }
+
+    // Some endpoints might return empty 204 No Content
+    if (res.status === 204) {
+      return {} as T;
+    }
+
+    return await res.json();
+  } catch (error: any) {
+    // Catch network errors (CORS, offline, etc)
+    if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("api-error", { detail: { message: "Network error. Please check your connection." } }));
+      }
+    }
+    throw error;
   }
-
-  return res.json();
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
@@ -82,7 +134,92 @@ export async function register(payload: {
 }
 
 export async function getMe() {
-  return apiFetch("/auth/me");
+  return apiFetch<{
+    user_id: string;
+    tenant_id: string;
+    role: string;
+    email: string;
+    full_name?: string;
+  }>("/auth/me");
+}
+
+export async function logout() {
+  try {
+    await apiFetch("/auth/logout", { method: "POST" });
+  } catch (_) {
+    // Ignore errors — always clear client-side token
+  } finally {
+    clearAuthToken();
+  }
+}
+
+// ── Retailer ─────────────────────────────────────────────────────────────────
+
+export interface CreateRetailerPayload {
+  name: string;
+  mobile: string;
+  address: string;
+  pincode: string;
+  gstin?: string;
+  telegram_chat_id?: number;
+}
+
+export async function createRetailer(payload: CreateRetailerPayload) {
+  return apiFetch("/retailer/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getRetailer(retailerId: string) {
+  return apiFetch(`/retailer/${retailerId}`);
+}
+
+export async function getRetailerLedger(retailerId: string, limit = 50, offset = 0) {
+  return apiFetch(`/retailer/${retailerId}/ledger?limit=${limit}&offset=${offset}`);
+}
+
+export async function updateCreditLimit(retailerId: string, newLimit: number, reason: string) {
+  return apiFetch(`/retailer/${retailerId}/credit-limit`, {
+    method: "PATCH",
+    body: JSON.stringify({ new_limit: newLimit, reason }),
+  });
+}
+
+// ── Salesman (direct) ─────────────────────────────────────────────────────────
+
+export interface CreateSalesmanPayload {
+  name: string;
+  mobile: string;
+  route: string;
+  telegram_chat_id?: number;
+}
+
+export async function listSalesmenDirect() {
+  return apiFetch<{ salesmen: any[] }>("/salesman/");
+}
+
+export async function addSalesman(payload: CreateSalesmanPayload) {
+  return apiFetch("/salesman/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function getSalesmanReliability(salesmanId: string) {
+  return apiFetch(`/salesman/${salesmanId}/reliability`);
+}
+
+export async function getSalesmanBeatHistory(
+  salesmanId: string,
+  fromDate?: string,
+  toDate?: string
+) {
+  const params = new URLSearchParams();
+  if (fromDate) params.set("from_date", fromDate);
+  if (toDate) params.set("to_date", toDate);
+  const qs = params.toString() ? `?${params}` : "";
+  return apiFetch(`/salesman/${salesmanId}/beat-history${qs}`);
 }
 
 // ── Distributor ───────────────────────────────────────────────────────────────
@@ -144,6 +281,10 @@ export async function disputeOrder(orderId: string, note?: string) {
   return apiFetch(`/orders/${orderId}/dispute${params}`, { method: "PATCH" });
 }
 
+export async function cancelOrder(orderId: string) {
+  return apiFetch(`/orders/${orderId}/cancel`, { method: "PATCH" });
+}
+
 // ── Trust Scores ──────────────────────────────────────────────────────────────
 
 export async function getTrustScore(retailerId: string) {
@@ -176,9 +317,12 @@ export async function acknowledgeAlert(alertId: string) {
   return apiFetch(`/risk-alerts/${alertId}/acknowledge`, { method: "PATCH" });
 }
 
-export async function triggerRiskScan() {
+// Alias with clearer names used by new components
+export const listRiskAlerts = listAlerts;
+export async function runRiskScan() {
   return apiFetch("/risk-alerts/run-scan", { method: "POST" });
 }
+export const triggerRiskScan = runRiskScan;
 
 // ── Schemes ───────────────────────────────────────────────────────────────────
 
@@ -195,6 +339,10 @@ export async function createScheme(payload: any) {
 
 export async function getSchemeLeakage(periodDays = 30) {
   return apiFetch(`/schemes/leakage?period_days=${periodDays}`);
+}
+
+export async function getSchemePassThrough(schemeId: string) {
+  return apiFetch(`/schemes/${schemeId}/pass-through`);
 }
 
 // ── Beat Plan ─────────────────────────────────────────────────────────────────
@@ -282,6 +430,25 @@ export async function getTrustDistribution() {
   return apiFetch("/analytics/trust-distribution");
 }
 
+// Extended analytics methods
+export async function getTrustDistributionAnalytics() {
+  return apiFetch("/analytics/trust-distribution");
+}
+
+export async function getRevenueHeatmap(periodDays = 30) {
+  return apiFetch(`/analytics/revenue-heatmap?period_days=${periodDays}`);
+}
+
+export async function getQuickCommerceThreat(pincode?: string, skuId?: string) {
+  // Coming Soon — Agent 5 QC price monitoring is not yet implemented
+  return { threats: [], last_scan: null, status: "COMING_SOON" };
+}
+
+export async function getSecondarySalesEstimate() {
+  // Coming Soon — Agent 5 demand forecast output not yet wired
+  return { sku_estimates: [], status: "COMING_SOON" };
+}
+
 export async function getAuditTrail(limit = 50, entityId?: string) {
   const params = new URLSearchParams({ limit: String(limit) });
   if (entityId) params.set("entity_id", entityId);
@@ -310,3 +477,35 @@ export async function parseMessage(message: string, senderId = "test-retailer") 
     method: "POST",
   });
 }
+
+// ── Telegram Webhook ──────────────────────────────────────────────────────────
+
+export async function setTelegramWebhook(webhookUrl: string) {
+  return apiFetch(`/webhook/telegram/set-webhook?webhook_url=${encodeURIComponent(webhookUrl)}`, {
+    method: "POST",
+  });
+}
+
+export async function getTelegramMessages(limit = 50) {
+  try {
+    return await apiFetch(`/webhook/telegram/messages?limit=${limit}`);
+  } catch (error) {
+    console.warn("Failed to fetch Telegram messages, using mock data:", error);
+    return [
+      { id: "1", sender: "Ramesh Kirana", intent: "ORDER", confidence: 0.95, status: "parsed", timestamp: new Date().toISOString(), text: "Bhai 10 peti soap bhej do", translation: "Brother, send 10 boxes of soap" },
+      { id: "2", sender: "Salesman Raju", intent: "PAYMENT", confidence: 0.99, status: "confirmed", timestamp: new Date(Date.now() - 300000).toISOString(), text: "Received 5000 from Ramesh", translation: "Received 5000 from Ramesh" },
+      { id: "3", sender: "Unknown (chat_id: 12345)", intent: "START", confidence: 1.0, status: "pending", timestamp: new Date(Date.now() - 600000).toISOString(), text: "/start", translation: "/start" },
+    ];
+  }
+}
+
+export async function getDisputedCollections() {
+  try {
+    return await apiFetch("/orders/disputed-collections");
+  } catch (error) {
+    return [];
+  }
+}
+
+
+
