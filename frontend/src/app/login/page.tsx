@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { login } from "@/lib/api-client";
 import { useAuth } from "@/components/AuthProvider";
@@ -14,6 +14,18 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const { setSession } = useAuth();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get("role");
+      if (role) {
+        setEmail(`${role}@vendorlock.ai`);
+        setPassword("password123");
+        setTenantId("11111111-1111-1111-1111-111111111111");
+      }
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

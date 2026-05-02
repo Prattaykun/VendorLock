@@ -3,7 +3,9 @@
  * Handles auth, data fetching, and Agent pipeline invocations.
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+const API_BASE = typeof window !== "undefined" 
+  ? `http://${window.location.hostname}:8001/api/v1` 
+  : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001/api/v1");
 
 // ── Auth Token Management ─────────────────────────────────────────────────────
 
@@ -428,7 +430,7 @@ export async function verifyCertificate(certificateId: string) {
 }
 
 export async function getCertificateHistory(retailerId: string) {
-  return apiFetch(`/certificate/history/${retailerId}`);
+  return apiFetch(`/certificate/${retailerId}/history`);
 }
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
@@ -484,14 +486,14 @@ export type AgentName =
   | "agent_6_beat_intelligence";
 
 export async function runAgent(agent: AgentName, inputPayload?: Record<string, unknown>) {
-  return apiFetch("/agents/run", {
+  return apiFetch("/agent/run", {
     method: "POST",
     body: JSON.stringify({ agent, input_payload: inputPayload }),
   });
 }
 
 export async function parseMessage(message: string, senderId = "test-retailer") {
-  return apiFetch(`/agents/parse-message?message=${encodeURIComponent(message)}&sender_id=${senderId}`, {
+  return apiFetch(`/agent/parse-message?message=${encodeURIComponent(message)}&sender_id=${senderId}`, {
     method: "POST",
   });
 }
