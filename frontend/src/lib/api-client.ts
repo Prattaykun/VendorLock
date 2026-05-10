@@ -3,11 +3,14 @@
  * Handles auth, data fetching, and Agent pipeline invocations.
  */
 
-const API_BASE =
+const _rawBase =
   process.env.NEXT_PUBLIC_API_URL ||
   (typeof window !== "undefined"
-    ? `http://${window.location.hostname}:8001/api/v1`
-    : "http://localhost:8001/api/v1");
+    ? `http://${window.location.hostname}:8001`
+    : "http://localhost:8001");
+
+// Ensure the base URL always ends with /api/v1 (handles env vars with or without it)
+const API_BASE = _rawBase.replace(/\/api\/v1\/?$/, "") + "/api/v1";
 
 // ── Auth Token Management ─────────────────────────────────────────────────────
 
